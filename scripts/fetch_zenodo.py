@@ -62,12 +62,21 @@ def is_raw_sequence(name):
 
 
 def save(name, blob, found, directory=None):
+    """Write a deposit member, keeping its folder so same-named files survive.
+
+    Several genera ship a record_anchor_check.csv of their own; saving by
+    basename alone silently kept whichever arrived first and discarded the rest.
+    """
     directory = directory or OUT
+    stem = os.path.basename(name)
+    parent = os.path.basename(os.path.dirname(name.rstrip("/")))
+    if parent and parent not in ("", ".", "results", "data"):
+        stem = f"{parent}__{stem}"
     os.makedirs(directory, exist_ok=True)
-    path = os.path.join(directory, os.path.basename(name))
+    path = os.path.join(directory, stem)
     with open(path, "wb") as f:
         f.write(blob)
-    found.add(os.path.basename(name))
+    found.add(stem)
     print(f"  wrote {path} ({len(blob)} bytes)")
 
 
@@ -103,8 +112,8 @@ def main():
                     if member.endswith("/"):
                         continue
                     base = os.path.basename(member)
-                    if base in WANTED and base not in found:
-                        save(base, z.read(member), found)
+                    if base in WANTED:
+                        save(member, z.read(member), found)
                     elif is_raw_sequence(member) and base not in raw_found:
                         save(base, z.read(member), raw_found, RAW_OUT)
 
@@ -116,7 +125,8 @@ def main():
               f"find no sequence records unless you put them in {RAW_OUT}/ "
               f"yourself.")
 
-    missing = WANTED - found
+    missing = {w for w in WANTED
+               if not any(f == w or f.endswith("__" + w) for f in found)}
     with open(os.path.join(OUT, "zenodo_source.txt"), "w") as f:
         f.write(f"record_id\t{rid}\ndoi\t{doi}\ntitle\t{title}\n"
                 f"version\t{version}\nfetched\t{', '.join(sorted(found))}\n")

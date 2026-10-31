@@ -32,7 +32,7 @@ import os
 import sys
 
 import numpy as np
-from scipy.stats import gaussian_kde
+from canonical import Registry, collapse
 
 BIO = [f"bio{i}" for i in range(1, 20)]
 SEQUENCE_SOURCES = {"BOLD", "GenBank"}
@@ -74,7 +74,7 @@ SCHEMES = {
     # The floor: every weight set to the chance the label is simply correct,
     # unverifiable records included at the observed base rate. If the claim
     # survives here it survives the strongest objection to it.
-    "label_accuracy": (None, None),
+    "non_contradiction": (None, None),
     "strict": ({"AGREES": 1.0, "AGREES_SHARED_CLUSTER": 0.25, "NO_ANCHOR": 0.0,
                 "UNNAMED_SUGGESTED": 0.0, "UNNAMED_SEVERAL_POSSIBLE": 0.0,
                 "DISAGREES": 0.0}, 0.0),
@@ -170,13 +170,22 @@ def assign_roles(rows):
 
 
 def anchor_table():
-    """Rows of the preceding study's per-record anchor check, if present."""
-    for path in (os.path.join("data", "external", "record_anchor_check.csv"),
-                 os.path.join("data", "derived", "record_anchor_check.csv")):
-        if os.path.exists(path):
+    """Every per-record anchor check in the deposit, across all genera.
+
+    The preceding study files one table per genus. Reading a single file by
+    basename silently drops the others, which is how an entire genus can appear
+    to carry no identification evidence when its table exists.
+    """
+    rows, seen = [], set()
+    for pattern in (os.path.join("data", "external", "*record_anchor_check.csv"),
+                    os.path.join("data", "derived", "*record_anchor_check.csv")):
+        for path in sorted(glob.glob(pattern)):
+            if os.path.basename(path) in seen:
+                continue
+            seen.add(os.path.basename(path))
             with open(path) as f:
-                return list(csv.DictReader(f))
-    return []
+                rows += list(csv.DictReader(f))
+    return rows
 
 
 def load_anchor_counts():
@@ -207,12 +216,7 @@ def label_accuracy(verdicts):
 
 
 def load_verdicts():
-    for path in (os.path.join("data", "external", "record_anchor_check.csv"),
-                 os.path.join("data", "derived", "record_anchor_check.csv")):
-        if os.path.exists(path):
-            with open(path) as f:
-                return {r["record_id"]: r["verdict"] for r in csv.DictReader(f)}
-    return {}
+    return {r["record_id"]: r["verdict"] for r in anchor_table() if r.get("verdict")}
 
 
 def pca2(matrix):
@@ -228,28 +232,61 @@ def pca2(matrix):
     return scores, var[:2], (mean, sd, vt[:2])
 
 
-def density_on_grid(points, gx, gy, weights=None):
-    """Gaussian KDE on a grid, with the effective area of its kernel.
+def reference_covariance(points):
+    """Smoothing covariance, fixed once and reused by every weight scheme.
+
+    SciPy derives its bandwidth from the weighted effective sample size, so a
+    weighted and an unweighted density differ in how far credit is spread as
+    well as in how much credit there is. Comparing them would then confound the
+    two. The bandwidth is therefore computed once from the unweighted points by
+    Scott's rule and held fixed across schemes.
+    """
+    x = np.asarray(points, dtype=float)
+    if len(x) < 3:
+        return np.eye(2)
+    cov = np.cov(x.T)
+    factor = len(x) ** (-1.0 / (x.shape[1] + 4))     # Scott
+    return np.atleast_2d(cov) * factor ** 2
+
+
+def density_on_grid(points, gx, gy, weights=None, covariance=None):
+    """Gaussian density on a grid under an explicit covariance.
 
     Returns (density, kernel_area). The density integrates to 1; kernel_area is
     the climate-space area of one bandwidth, which converts a density into an
-    expected record count per neighbourhood and is independent of grid spacing.
+    expected specimen count per neighbourhood, independent of grid spacing.
     """
     shape = gx.shape
-    if len(points) < 3:
+    x = np.asarray(points, dtype=float)
+    if len(x) < 3:
         return np.zeros(shape), 1.0
-    if weights is not None:
-        weights = np.asarray(weights, dtype=float)
-        if weights.sum() <= 0:
-            return np.zeros(shape), 1.0
-        weights = weights / weights.sum()
+    H = reference_covariance(x) if covariance is None else np.asarray(covariance)
     try:
-        kde = gaussian_kde(np.asarray(points).T, weights=weights)
+        inv = np.linalg.inv(H)
+        det = np.linalg.det(H)
     except np.linalg.LinAlgError:
         return np.zeros(shape), 1.0
-    flat = np.vstack([gx.ravel(), gy.ravel()])
-    area = 2.0 * np.pi * float(np.sqrt(np.linalg.det(kde.covariance)))
-    return kde(flat).reshape(shape), area
+    if det <= 0:
+        return np.zeros(shape), 1.0
+
+    if weights is None:
+        w = np.ones(len(x))
+    else:
+        w = np.asarray(weights, dtype=float)
+        if w.sum() <= 0:
+            return np.zeros(shape), 1.0
+    w = w / w.sum()
+
+    nodes = np.column_stack([gx.ravel(), gy.ravel()])
+    out = np.zeros(len(nodes))
+    norm = 1.0 / (2.0 * np.pi * np.sqrt(det))
+    for start in range(0, len(x), 512):                 # chunked to bound memory
+        chunk, wc = x[start:start + 512], w[start:start + 512]
+        d = nodes[:, None, :] - chunk[None, :, :]
+        m = np.einsum("nki,ij,nkj->nk", d, inv, d)
+        out += (np.exp(-0.5 * m) * wc).sum(axis=1)
+    area = 2.0 * np.pi * float(np.sqrt(det))
+    return (out * norm).reshape(shape), area
 
 
 def coverage_and_deficit(occ_density, seq_density, effective_n, kernel_area,
@@ -277,7 +314,7 @@ def coverage_and_deficit(occ_density, seq_density, effective_n, kernel_area,
     return coverage, deficit, index
 
 
-def bilinear(surface, gx, gy, x, y):
+def sample_surface(surface, gx, gy, x, y):
     """Sample a grid surface at arbitrary points by nearest-node lookup."""
     xs, ys = gx[0, :], gy[:, 0]
     ix = np.clip(np.searchsorted(xs, x) - 1, 0, len(xs) - 1)
@@ -286,7 +323,7 @@ def bilinear(surface, gx, gy, x, y):
 
 
 def weights_for(seq_rows, verdicts, scheme=None, unmatched_weight=DEFAULT_WEIGHT,
-                anchor_counts=None):
+                anchor_counts=None, registry=None):
     """Verifiability weight per sequence record, and how many had no verdict.
 
     A scheme value of None is derived rather than chosen: for a record whose
@@ -297,17 +334,37 @@ def weights_for(seq_rows, verdicts, scheme=None, unmatched_weight=DEFAULT_WEIGHT
     out, unmatched = [], 0
     for r in seq_rows:
         rid = r.get("record_id", "")
-        verdict = verdicts.get(rid)
+        verdict = registry.verdict(rid) if registry else verdicts.get(rid)
         if verdict is None:
             unmatched += 1
             out.append(unmatched_weight)
             continue
         value = scheme.get(verdict, unmatched_weight)
         if value is None:
-            k = anchor_counts.get(rid)
+            k = (registry.anchor_count(rid) if registry
+                 else anchor_counts.get(rid))
             value = (1.0 / k) if k else FALLBACK_SHARED
         out.append(value)
     return np.array(out, dtype=float), unmatched
+
+
+def marginal_gain(occ_density, lam, gx, gy, centroid, covariance, min_reliable):
+    """Exact fall in the deficit index from adding one verified specimen.
+
+    Adding a specimen of unit weight at `centroid` raises the expected count by
+    one kernel, so lambda_new = lambda + A * N(z; centroid, H), where A is the
+    kernel area. No approximation and no suppression constant is involved.
+    """
+    inv = np.linalg.inv(covariance)
+    det = np.linalg.det(covariance)
+    nodes = np.column_stack([gx.ravel(), gy.ravel()])
+    d = nodes - np.asarray(centroid)[None, :]
+    kernel = np.exp(-0.5 * np.einsum("ni,ij,nj->n", d, inv, d)) / (2 * np.pi * np.sqrt(det))
+    lam_new = lam + (2 * np.pi * np.sqrt(det)) * kernel.reshape(gx.shape)
+    mass = occ_density / occ_density.sum() if occ_density.sum() > 0 else occ_density
+    before = float((mass * np.exp(-lam / min_reliable)).sum())
+    after = float((mass * np.exp(-lam_new / min_reliable)).sum())
+    return before - after
 
 
 def priority_list(occ_rows, occ_scores, uncovered, pc_bandwidth):
@@ -368,6 +425,9 @@ def main():
 
     rows = load_records(path, genus)
     occ_rows, seq_rows, reclassified = assign_roles(rows)
+    registry = Registry(load_verdicts(), load_anchor_counts())
+    seq_rows, collapse_report = collapse(seq_rows, registry)
+    rows = occ_rows + seq_rows
     if not occ_rows or not seq_rows:
         sys.exit(f"Need both occurrence and sequence records; got "
                  f"{len(occ_rows)} and {len(seq_rows)} from {path}")
@@ -385,10 +445,12 @@ def main():
     gx, gy = np.meshgrid(np.linspace(lo[0], hi[0], GRID),
                          np.linspace(lo[1], hi[1], GRID))
 
+    seq_cov = reference_covariance(seq_scores)
     occ_density, _ = density_on_grid(occ_scores, gx, gy)
-    naive_density, naive_area = density_on_grid(seq_scores, gx, gy)
-    w, unmatched = weights_for(seq_rows, verdicts, anchor_counts=anchor_counts)
-    weighted_density, wtd_area = density_on_grid(seq_scores, gx, gy, weights=w)
+    naive_density, naive_area = density_on_grid(seq_scores, gx, gy,
+                                                covariance=seq_cov)
+    w, unmatched = weights_for(seq_rows, verdicts, anchor_counts=anchor_counts, registry=registry)
+    weighted_density, wtd_area = density_on_grid(seq_scores, gx, gy, weights=w, covariance=seq_cov)
 
     naive_cov, naive_def, naive_index = coverage_and_deficit(
         occ_density, naive_density, len(seq_scores), naive_area)
@@ -402,20 +464,22 @@ def main():
     for label, unmatched_w in (("unverified trusted", 1.0),
                                ("unverified discarded", 0.0)):
         bw, _ = weights_for(seq_rows, verdicts, WEIGHTS, unmatched_w,
-                            anchor_counts)
-        bd, ba = density_on_grid(seq_scores, gx, gy, weights=bw)
+                            anchor_counts, registry)
+        bd, ba = density_on_grid(seq_scores, gx, gy, weights=bw, covariance=seq_cov)
         bounds[label] = coverage_and_deficit(occ_density, bd, bw.sum(), ba)[2]
     if accuracy is not None:
-        acc_scheme = {"AGREES": 1.0, SHARED_CLUSTER: None, "NO_ANCHOR": accuracy,
-                      "UNNAMED_SUGGESTED": 0.0, "UNNAMED_SEVERAL_POSSIBLE": 0.0,
-                      "DISAGREES": 0.0}
-        bw, _ = weights_for(seq_rows, verdicts, acc_scheme, accuracy, anchor_counts)
-        bd, ba = density_on_grid(seq_scores, gx, gy, weights=bw)
-        bounds["labels merely correct"] = coverage_and_deficit(
+        # Every weight set to the non-contradiction rate, as described: the
+        # scheme in which verifiability is ignored and only the chance that a
+        # label is uncontradicted is credited.
+        acc_scheme = {k: accuracy for k in WEIGHTS}
+        bw, _ = weights_for(seq_rows, verdicts, acc_scheme, accuracy, anchor_counts, registry)
+        bd, ba = density_on_grid(seq_scores, gx, gy, weights=bw, covariance=seq_cov)
+        bounds["non-contradiction"] = coverage_and_deficit(
             occ_density, bd, bw.sum(), ba)[2]
 
     # Per-occurrence-record uncovered fraction under the weighted surface.
-    uncovered = 1.0 - bilinear(wtd_cov, gx, gy, occ_scores[:, 0], occ_scores[:, 1])
+    wtd_cov_matrix = seq_cov
+    uncovered = 1.0 - sample_surface(wtd_cov, gx, gy, occ_scores[:, 0], occ_scores[:, 1])
     bandwidth = float(np.mean([gx[0, 1] - gx[0, 0], gy[1, 0] - gy[0, 0]]) * GRID / 12)
 
     with open(os.path.join(outdir, "climate_space.csv"), "w", newline="") as f:
@@ -441,11 +505,44 @@ def main():
         for (la, lo_), vals in sorted(geo.items()):
             wr.writerow([la, lo_, len(vals), round(float(np.mean(vals)), 4)])
 
-    picks = priority_list(occ_rows, occ_scores, uncovered, bandwidth)
+    # Rank every occurrence-bearing cell by the exact reduction in the deficit
+    # index that one verified specimen from that cell's climate would produce.
+    lam = w.sum() * weighted_density * wtd_area
+    cells = {}
+    for row, pc_pos, u in zip(occ_rows, occ_scores, uncovered):
+        key = (int(np.floor(row["_lat"] / CELL) * CELL),
+               int(np.floor(row["_lon"] / CELL) * CELL))
+        c = cells.setdefault(key, {"n": 0, "u": [], "pc": [], "country": {}})
+        c["n"] += 1
+        c["u"].append(float(u))
+        c["pc"].append(pc_pos)
+        country = (row.get("country") or "").strip()
+        if country:
+            c["country"][country] = c["country"].get(country, 0) + 1
+
+    scored = []
+    for key, c in cells.items():
+        centroid = np.array(c["pc"]).mean(axis=0)
+        scored.append({
+            "lat_bin": key[0], "lon_bin": key[1],
+            "lat_range": f"{key[0]} to {key[0] + CELL:g}",
+            "lon_range": f"{key[1]} to {key[1] + CELL:g}",
+            "country": max(c["country"], key=c["country"].get) if c["country"] else "",
+            "occurrence_records": c["n"],
+            "uncovered_mass": round(float(np.sum(c["u"])), 4),
+            "mean_uncovered_fraction": round(float(np.mean(c["u"])), 4),
+            "deficit_reduction": round(marginal_gain(
+                occ_density, lam, gx, gy, centroid, wtd_cov_matrix,
+                MIN_RELIABLE), 6),
+        })
+    scored.sort(key=lambda r: -r["deficit_reduction"])
+    picks = scored[:N_PRIORITY]
     with open(os.path.join(outdir, "priority_list.csv"), "w", newline="") as f:
-        wr = csv.DictWriter(f, fieldnames=["rank", "lat_bin", "lon_bin", "country",
+        wr = csv.DictWriter(f, fieldnames=["rank", "lat_bin", "lon_bin", "lat_range",
+                                           "lon_range", "country",
                                            "occurrence_records", "uncovered_mass",
-                                           "mean_uncovered_fraction"])
+                                           "mean_uncovered_fraction",
+                                           "deficit_reduction"])
         wr.writeheader()
         for i, p in enumerate(picks, 1):
             wr.writerow({"rank": i, **p})
@@ -458,8 +555,8 @@ def main():
                     continue
                 scheme, unmatched_w = acc_scheme, accuracy
             sw, _ = weights_for(seq_rows, verdicts, scheme, unmatched_w,
-                                anchor_counts)
-            d, area = density_on_grid(seq_scores, gx, gy, weights=sw)
+                                anchor_counts, registry)
+            d, area = density_on_grid(seq_scores, gx, gy, weights=sw, covariance=seq_cov)
             _, _, idx = coverage_and_deficit(occ_density, d, sw.sum(), area)
             sens_rows.append({"scheme": name,
                               "mean_weight": round(float(sw.mean()), 4),
@@ -495,7 +592,11 @@ def main():
     lines = [
         f"climate table            {path}",
         f"genus filter             {genus or 'none (genera pooled)'}",
-        f"records used             {len(rows)} (occurrence {len(occ_rows)}, sequence {len(seq_rows)})",
+        f"records used             {len(rows)} (occurrence {len(occ_rows)}, "
+        f"sequence specimens {len(seq_rows)})",
+        f"duplicates collapsed     {collapse_report['collapsed']} rows "
+        f"({collapse_report['coordinate_conflicts']} with conflicting coordinates)",
+        f"crosswalk aliases        {registry.linked}",
         f"moved to occurrence      {reclass_note}",
         f"verdicts matched         {len(seq_rows) - unmatched}/{len(seq_rows)}"
         f" ({unmatched} took the default weight of {DEFAULT_WEIGHT})",
@@ -506,8 +607,8 @@ def main():
         f"cluster ({len(anchor_counts)} records)",
         f"PCA variance explained   PC1 {var[0]:.1%}, PC2 {var[1]:.1%}",
         "",
-        f"label accuracy (context) {accuracy:.3f} of {checkable} checkable "
-        f"labels stood ({contradicted} contradicted)" if accuracy is not None else "",
+        f"non-contradiction rate  {accuracy:.3f} of {checkable} checkable labels "
+        f"were not contradicted ({contradicted} were)" if accuracy is not None else "",
         "",
         f"deficit index, naive     {naive_index:.3f}",
         f"deficit index, weighted  {wtd_index:.3f}",
@@ -518,8 +619,8 @@ def main():
         f"  {bounds['unverified trusted']:.3f} unverified records trusted in full",
         f"  {bounds['unverified discarded']:.3f} unverified records discarded",
     ] + ([
-        f"  {bounds['labels merely correct']:.3f} FLOOR: every weight set to the "
-        f"chance the label is merely correct",
+        f"  {bounds['non-contradiction']:.3f} FLOOR: every weight set to the "
+        f"non-contradiction rate",
     ] if "labels merely correct" in bounds else []) + [
         "",
         f"occurrence records in climate space with <10% effective coverage: "
@@ -540,10 +641,10 @@ def main():
                   f"  {r['min_reliable']:>5g}  {r['deficit_naive']:.3f} -> "
                   f"{r['deficit_weighted']:.3f}" for r in thresh_rows]
     if picks:
-        lines += ["", f"top {min(5, len(picks))} sampling priorities:"]
+        lines += ["", f"top {min(5, len(picks))} priorities by exact deficit reduction:"]
         lines += [f"  {i}. {p['country'] or 'unknown'} "
-                  f"({p['lat_bin']}, {p['lon_bin']})  "
-                  f"uncovered mass {p['uncovered_mass']}"
+                  f"({p['lat_range']}, {p['lon_range']})  "
+                  f"deficit reduction {p['deficit_reduction']:.5f}"
                   for i, p in enumerate(picks[:5], 1)]
 
     text = "\n".join(l for l in lines if l is not None)

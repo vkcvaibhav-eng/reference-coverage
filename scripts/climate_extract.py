@@ -125,7 +125,11 @@ def bold_points():
 
 def gbif_points():
     for path in glob.glob(os.path.join(RAW, "**", "gbif_*.csv"), recursive=True):
-        if path.endswith("_query.txt"):
+        base = os.path.basename(path)
+        # Held-back photograph records and pre-cleaning backups must not re-enter.
+        if any(base.endswith(x) for x in ("_observations.csv", "_query.txt",
+                                          ".raw.bak", "_rejected.csv")):
+            print(f"  skipping {base}")
             continue
         with open(path) as f:
             for r in csv.DictReader(f):

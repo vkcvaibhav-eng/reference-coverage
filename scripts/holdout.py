@@ -21,7 +21,7 @@ as a robustness result rather than chosen.
 
 Outputs to results/holdout/:
     holdout_summary.txt    the single-cutoff report
-    holdout_records.csv    post-cutoff sequence records with uncovered fraction
+    holdout_records.csv    later-collected specimens with uncovered fraction
     cutoff_sweep.csv       one row per cutoff (--sweep only)
 """
 import csv
@@ -30,7 +30,9 @@ import sys
 
 import numpy as np
 
-from deficit import (GRID, WEIGHTS, assign_roles, bilinear, load_anchor_counts,
+from canonical import Registry, collapse
+from deficit import (GRID, WEIGHTS, assign_roles, reference_covariance,
+                     sample_surface, load_anchor_counts,
                      coverage_and_deficit, density_on_grid, load_records,
                      load_verdicts, newest_climate_table, pca2, weights_for)
 
@@ -44,7 +46,10 @@ MIN_TRAIN_SEQ = 150   # below this the training library is too thin to be a fair
 def prepare(path, genus=None):
     """Dated records with roles assigned, and their shared PCA climate space."""
     rows = load_records(path, genus)
-    assign_roles(rows)
+    occ0, seq0, _ = assign_roles(rows)
+    registry = Registry(load_verdicts(), load_anchor_counts())
+    seq0, _ = collapse(seq0, registry)
+    rows = occ0 + seq0
     dated = [r for r in rows if (r.get("year") or "").isdigit()]
     if not dated:
         sys.exit("The climate table carries no usable year column. Re-run "
@@ -57,10 +62,11 @@ def prepare(path, genus=None):
     lo, hi = scores.min(axis=0) - pad, scores.max(axis=0) + pad
     gx, gy = np.meshgrid(np.linspace(lo[0], hi[0], GRID),
                          np.linspace(lo[1], hi[1], GRID))
-    return rows, dated, position, var, gx, gy
+    return rows, dated, position, var, gx, gy, registry
 
 
-def run_one(cutoff, dated, position, gx, gy, verdicts, anchor_counts=None):
+def run_one(cutoff, dated, position, gx, gy, verdicts, anchor_counts=None,
+            registry=None):
     """One hold-out test. Returns a result dict, or a dict with 'skipped'."""
     pc = lambda subset: np.array([position[id(r)] for r in subset])
     early = [r for r in dated if r["_year"] <= cutoff]
@@ -74,27 +80,34 @@ def run_one(cutoff, dated, position, gx, gy, verdicts, anchor_counts=None):
                 "test_sequence": len(late_seq)}
 
     occ_density, _ = density_on_grid(pc(early_occ), gx, gy)
-    w, unmatched = weights_for(early_seq, verdicts, anchor_counts=anchor_counts)
+    w, unmatched = weights_for(early_seq, verdicts, anchor_counts=anchor_counts,
+                               registry=registry)
     seq_density, area = density_on_grid(pc(early_seq), gx, gy, weights=w)
     coverage, _, train_index = coverage_and_deficit(occ_density, seq_density,
                                                     w.sum(), area)
 
     late_pc = pc(late_seq)
-    observed = 1.0 - bilinear(coverage, gx, gy, late_pc[:, 0], late_pc[:, 1])
+    observed = 1.0 - sample_surface(coverage, gx, gy, late_pc[:, 0], late_pc[:, 1])
     obs_mean = float(observed.mean())
 
-    occ_pc = pc(early_occ)
-    occ_at = 1.0 - bilinear(coverage, gx, gy, occ_pc[:, 0], occ_pc[:, 1])
+    # Each null resamples, with equal probability, the uncovered fractions of a
+    # stated reference set. Weighting those draws by a density estimated from
+    # the same points would sample the square of that density, which is not the
+    # benchmark either name describes.
+    occ_pc, seq_pc = pc(early_occ), pc(early_seq)
+    occ_at = 1.0 - sample_surface(coverage, gx, gy, occ_pc[:, 0], occ_pc[:, 1])
+    seq_at = 1.0 - sample_surface(coverage, gx, gy, seq_pc[:, 0], seq_pc[:, 1])
     rng = np.random.default_rng(SEED)
     nulls, pvals = {}, {}
-    for label, surface in (("occurrence", occ_density), ("sequencing", seq_density)):
-        dens_at = bilinear(surface, gx, gy, occ_pc[:, 0], occ_pc[:, 1])
-        p = dens_at / dens_at.sum() if dens_at.sum() > 0 else None
-        draws = np.array(
-            [rng.choice(occ_at, size=len(late_seq), replace=True, p=p).mean()
-             for _ in range(DRAWS)])
+    for label, pool in (("recorded range", occ_at), ("already sequenced", seq_at)):
+        draws = np.array([rng.choice(pool, size=len(late_seq), replace=True).mean()
+                          for _ in range(DRAWS)])
         nulls[label] = draws
-        pvals[label] = max(float((draws >= obs_mean).mean()), 1.0 / DRAWS)
+        # Both tails, with the Monte Carlo correction; a large upper-tail p is a
+        # failure to find over-targeting, not evidence of under-targeting.
+        hi = (np.sum(draws >= obs_mean) + 1) / (DRAWS + 1)
+        lo = (np.sum(draws <= obs_mean) + 1) / (DRAWS + 1)
+        pvals[label] = {"upper": float(hi), "lower": float(lo)}
 
     return {"cutoff": cutoff, "skipped": "",
             "train_occurrence": len(early_occ), "train_sequence": len(early_seq),
@@ -107,15 +120,16 @@ def run_one(cutoff, dated, position, gx, gy, verdicts, anchor_counts=None):
 
 def report(res, var, path, genus=None):
     nulls, pvals = res["nulls"], res["pvals"]
-    if all(p < 0.05 for p in pvals.values()):
-        verdict = "post-cutoff sequencing targeted the gaps, against both nulls"
-    elif pvals["occurrence"] < 0.05:
-        verdict = ("post-cutoff sequencing beat sampling the recorded range at "
-                   "random, but not sequencing where sequencing already was: the "
-                   "signal may be novelty of locality rather than of climate")
+    rr = pvals["recorded range"]
+    if rr["upper"] < 0.05:
+        verdict = ("later-collected specimens sat in more uncovered climate than "
+                   "a resample of the recorded range")
+    elif rr["lower"] < 0.05:
+        verdict = ("later-collected specimens sat in LESS uncovered climate than "
+                   "a resample of the recorded range")
     else:
-        verdict = ("post-cutoff sequencing did no better than sampling the "
-                   "recorded range at random")
+        verdict = ("later-collected specimens were indistinguishable from a "
+                   "resample of the recorded range")
     lines = [
         f"climate table              {path}",
         f"genus filter               {genus or 'none (genera pooled)'}",
@@ -129,12 +143,12 @@ def report(res, var, path, genus=None):
         f"PCA variance explained     PC1 {var[0]:.1%}, PC2 {var[1]:.1%}",
         f"training deficit index     {res['train_deficit_index']:.3f}",
         "",
-        f"mean uncovered fraction at post-{res['cutoff']} sequence locations  "
+        f"mean uncovered fraction at specimens collected after {res['cutoff']}  "
         f"{res['observed']:.3f}",
     ] + [
         f"null '{label}'  {v.mean():.3f}"
         f"  [{np.percentile(v, 2.5):.3f}, {np.percentile(v, 97.5):.3f}]"
-        f"  one-sided p {pvals[label]:.4f}"
+        f"  p upper {pvals[label]['upper']:.4f}  p lower {pvals[label]['lower']:.4f}"
         for label, v in nulls.items()
     ] + ["", f"reading: {verdict}"]
     if res["thin_training"]:
@@ -157,33 +171,33 @@ def main():
     outdir = os.path.join(OUTDIR, genus.lower()) if genus else OUTDIR
     os.makedirs(outdir, exist_ok=True)
 
-    _, dated, position, var, gx, gy = prepare(path, genus)
+    _, dated, position, var, gx, gy, registry = prepare(path, genus)
     verdicts = load_verdicts()
     anchor_counts = load_anchor_counts()
 
     if sweep:
         out = []
         for cutoff in SWEEP:
-            res = run_one(cutoff, dated, position, gx, gy, verdicts, anchor_counts)
+            res = run_one(cutoff, dated, position, gx, gy, verdicts, anchor_counts, registry)
             if res.get("skipped"):
                 print(f"{cutoff}  skipped: {res['skipped']}")
                 out.append({"cutoff": cutoff, "train_sequence": res["train_sequence"],
                             "test_sequence": res["test_sequence"],
                             "observed": "", "null_occurrence": "",
-                            "p_occurrence": "", "null_sequencing": "",
-                            "p_sequencing": "", "ratio_to_occurrence_null": "",
+                            "p_lower_recorded": "", "null_sequencing": "",
+                            "p_lower_sequenced": "", "ratio_to_occurrence_null": "",
                             "note": res["skipped"]})
                 continue
-            n_occ = float(res["nulls"]["occurrence"].mean())
-            n_seq = float(res["nulls"]["sequencing"].mean())
+            n_occ = float(res["nulls"]["recorded range"].mean())
+            n_seq = float(res["nulls"]["already sequenced"].mean())
             out.append({
                 "cutoff": cutoff, "train_sequence": res["train_sequence"],
                 "test_sequence": res["test_sequence"],
                 "observed": round(res["observed"], 4),
                 "null_occurrence": round(n_occ, 4),
-                "p_occurrence": round(res["pvals"]["occurrence"], 4),
+                "p_lower_recorded": round(res["pvals"]["recorded range"]["lower"], 4),
                 "null_sequencing": round(n_seq, 4),
-                "p_sequencing": round(res["pvals"]["sequencing"], 4),
+                "p_lower_sequenced": round(res["pvals"]["already sequenced"]["lower"], 4),
                 "ratio_to_occurrence_null": round(res["observed"] / n_occ, 3)
                 if n_occ else "",
                 "note": "thin training library" if res["thin_training"] else ""})
@@ -191,8 +205,8 @@ def main():
                   f"test {res['test_sequence']:>5}  "
                   f"observed {res['observed']:.3f}  "
                   f"null {n_occ:.3f}/{n_seq:.3f}  "
-                  f"p {res['pvals']['occurrence']:.4f}/"
-                  f"{res['pvals']['sequencing']:.4f}"
+                  f"p_lo {res['pvals']['recorded range']['lower']:.4f}/"
+                  f"{res['pvals']['already sequenced']['lower']:.4f}"
                   f"{'  (thin)' if res['thin_training'] else ''}")
         with open(os.path.join(outdir, "cutoff_sweep.csv"), "w", newline="") as f:
             wr = csv.DictWriter(f, fieldnames=list(out[0].keys()))
@@ -211,7 +225,7 @@ def main():
         return
 
     cutoff = int(args[0]) if args else 2015
-    res = run_one(cutoff, dated, position, gx, gy, verdicts, anchor_counts)
+    res = run_one(cutoff, dated, position, gx, gy, verdicts, anchor_counts, registry)
     if res.get("skipped"):
         sys.exit(f"Cutoff {cutoff}: {res['skipped']} (training occurrence "
                  f"{res['train_occurrence']}, training sequence "
