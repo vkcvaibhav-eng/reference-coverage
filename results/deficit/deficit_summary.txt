@@ -1,0 +1,36 @@
+climate table            data/derived/climate_worldclim_10m.csv
+records used             6412 (occurrence 4903, sequence 1509)
+verdicts matched         1068/1509 (441 took the default weight of 0.25)
+mean reliability weight  0.340
+effective sequences      513.2 of 1509 records
+coverage threshold       5 reliable sequences per neighbourhood
+PCA variance explained   PC1 41.5%, PC2 23.7%
+
+deficit index, naive     0.134
+deficit index, weighted  0.189
+inflation of the gap     +0.054 (+40.4% relative)
+
+occurrence records in climate space with <10% effective coverage: 179/4903 (3.7%)
+geographic cells (2 degrees) holding occurrences: 525
+
+weight sensitivity:
+  naive                effective sequences  1509.0  deficit index 0.135
+  default              effective sequences   513.2  deficit index 0.189
+  unverified_trusted   effective sequences   844.0  deficit index 0.143
+  strict               effective sequences   201.8  deficit index 0.211
+  lenient              effective sequences   835.0  deficit index 0.168
+  anchored_only        effective sequences   132.0  deficit index 0.309
+
+coverage-threshold sensitivity (naive -> weighted):
+      1  0.046 -> 0.064  (+39.8% inflation)
+      3  0.096 -> 0.136  (+42.1% inflation)
+      5  0.135 -> 0.189  (+40.4% inflation)
+     10  0.202 -> 0.291  (+44.1% inflation)
+     20  0.296 -> 0.444  (+50.0% inflation)
+
+top 5 sampling priorities:
+  1. Australia (-14, 130)  uncovered mass 73.1586
+  2. Réunion (-22, 54)  uncovered mass 67.3323
+  3. Chinese Taipei (22, 120)  uncovered mass 36.9879
+  4. Australia (-34, 150)  uncovered mass 31.7495
+  5. United States of America (32, -116)  uncovered mass 16.3389

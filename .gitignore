@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.DS_Store
+
+# Climate and land-cover rasters are downloaded on demand, never versioned
+*.tif
+*.tiff
+*.zip
+*.nc
+
+# Large raw downloads; regenerate with the fetch scripts
+data/raw/
+data/external/
