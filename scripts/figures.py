@@ -14,6 +14,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
+from decimal import Decimal, ROUND_HALF_UP
 from matplotlib.lines import Line2D
 
 plt.rcParams.update({
@@ -127,19 +128,36 @@ def fig_sensitivity(dd, outdir):
     ws = read(os.path.join(dd, "weight_sensitivity.csv"))
     ts = read(os.path.join(dd, "threshold_sensitivity.csv"))
 
-    fig, (a1, a2) = plt.subplots(1, 2, figsize=(DOUBLE, DOUBLE / 2.7))
+    fig, (a1, a2) = plt.subplots(1, 2, figsize=(DOUBLE, DOUBLE / 2.7),
+                                 gridspec_kw={"width_ratios": [1.15, 1]})
+    fig.subplots_adjust(wspace=0.42)
 
-    order = ["naive", "label_accuracy", "unverified_trusted", "lenient",
-             "default", "strict", "anchored_only"]
-    ws = sorted(ws, key=lambda r: order.index(r["scheme"])
-                if r["scheme"] in order else 99)
-    labels = [r["scheme"].replace("_", " ") for r in ws]
+    # names as the text uses them, not the internal scheme keys
+    labels_for = {
+        "naive": "Record count",
+        "non_contradiction": "Uniform non-contradiction",
+        "label_accuracy": "Uniform non-contradiction",
+        "lenient": "Lenient",
+        "unverified_trusted": "No-verdict records credited fully",
+        "default": "Default",
+        "strict": "Strict",
+        "anchored_only": "Anchored only",
+    }
+    # most generous scheme first, so the bars read as a progression
+    ws = sorted(ws, key=lambda r: -float(r["mean_weight"]))
+    labels = [labels_for.get(r["scheme"], r["scheme"].replace("_", " "))
+              for r in ws]
     idx = [float(r["deficit_index"]) for r in ws]
     eff = [float(r["effective_records"]) for r in ws]
     naive = next(float(r["deficit_index"]) for r in ws if r["scheme"] == "naive")
 
+    def one_dp(v):
+        """Half-up to one decimal, so 344.55 reads 344.6 as in the text."""
+        return Decimal(str(v)).quantize(Decimal("0.1"), rounding=ROUND_HALF_UP)
+
     y = np.arange(len(ws))
-    cols = ["0.55" if r["scheme"] == "naive" else "#2b5d8a" for r in ws]
+    cols = ["0.55" if r["scheme"] == "naive" else
+            "#17405e" if r["scheme"] == "default" else "#2b5d8a" for r in ws]
     a1.barh(y, idx, color=cols, height=0.62)
     a1.axvline(naive, color="0.25", ls="--", lw=0.7)
     a1.set_yticks(y)
@@ -147,8 +165,9 @@ def fig_sensitivity(dd, outdir):
     a1.invert_yaxis()
     a1.set_xlabel("Coverage deficit index")
     for yi, (v, e) in enumerate(zip(idx, eff)):
-        a1.text(v + 0.006, yi, f"{v:.3f}  (n={e:.0f})", va="center", fontsize=6)
-    a1.set_xlim(0, max(idx) * 1.33)
+        a1.text(v + 0.006, yi, f"{v:.3f}  (n={one_dp(e)})", va="center",
+                fontsize=6)
+    a1.set_xlim(0, max(idx) * 1.55)
 
     k = [float(r["min_reliable"]) for r in ts]
     dn = [float(r["deficit_naive"]) for r in ts]
@@ -162,12 +181,13 @@ def fig_sensitivity(dd, outdir):
                     textcoords="offset points", xytext=(0, 5),
                     ha="center", fontsize=6, color="#2b5d8a")
     a2.set_xscale("log")
+    a2.set_xlim(min(k) * 0.82, max(k) * 1.22)   # room for the end annotations
     a2.set_xticks(k)
     a2.set_xticklabels([f"{int(v)}" for v in k])
-    a2.set_xlabel("Verifiable sequences per neighbourhood ($k$)")
+    a2.set_xlabel("Coverage saturation scale ($k$)")
     a2.set_ylabel("Coverage deficit index")
     a2.legend(frameon=False, loc="upper left")
-    a2.set_ylim(0, max(dw) * 1.2)
+    a2.set_ylim(0, max(dw) * 1.28)
 
     for ax, lab in ((a1, "a"), (a2, "b")):
         ax.text(-0.12, 1.08, f"({lab})", transform=ax.transAxes, va="top",

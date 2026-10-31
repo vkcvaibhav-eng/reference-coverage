@@ -567,7 +567,7 @@ def main():
             _, _, idx = coverage_and_deficit(occ_density, d, sw.sum(), area)
             sens_rows.append({"scheme": name,
                               "mean_weight": round(float(sw.mean()), 4),
-                              "effective_records": round(float(sw.sum()), 1),
+                              "effective_records": round(float(sw.sum()), 2),
                               "deficit_index": round(idx, 4)})
         with open(os.path.join(outdir, "weight_sensitivity.csv"), "w", newline="") as f:
             wr = csv.DictWriter(f, fieldnames=["scheme", "mean_weight",
@@ -624,7 +624,7 @@ def main():
            if naive_index else ""),
         "bounds:",
         f"  {bounds['unverified trusted']:.3f} unverified records trusted in full",
-        f"  {bounds['unverified discarded']:.3f} unverified records discarded",
+        f"  {bounds['unverified discarded']:.3f} records without matched verdicts discarded",
     ] + ([
         f"  {bounds['non-contradiction']:.3f} FLOOR: every weight set to the "
         f"non-contradiction rate",

@@ -18,7 +18,7 @@ deficit index, weighted  0.287
 inflation of the gap     +0.099 (+52.6% relative)
 bounds:
   0.269 unverified records trusted in full
-  0.296 unverified records discarded
+  0.296 records without matched verdicts discarded
 
 occurrence records in climate space with <10% effective coverage: 942/12671 (7.4%)
 geographic cells (2 degrees) holding occurrences: 700

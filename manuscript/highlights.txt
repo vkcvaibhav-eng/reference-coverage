@@ -1,5 +1,5 @@
 Reference coverage is weighted by whether each species label can be verified
-One quarter of Tetranychus rows were the same mite under a second identifier
+Duplicate identifiers accounted for 25.3% of Tetranychus database rows
 Verifiability raises the Tetranychus coverage deficit from 0.237 to 0.305
 Candidate localities are ranked by one specimen's exact effect on that index
-Later-collected mites sit in better covered climate than the record at large
+Later-collected records occupy better-covered climate than the recorded range

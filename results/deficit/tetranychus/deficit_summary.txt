@@ -18,15 +18,15 @@ deficit index, weighted  0.305
 inflation of the gap     +0.068 (+28.6% relative)
 bounds:
   0.284 unverified records trusted in full
-  0.315 unverified records discarded
+  0.315 records without matched verdicts discarded
 
 occurrence records in climate space with <10% effective coverage: 819/9061 (9.0%)
 geographic cells (2 degrees) holding occurrences: 611
 
 weight sensitivity:
   naive                effective sequences   728.0  deficit index 0.237
-  default              effective sequences   344.5  deficit index 0.305
-  unverified_trusted   effective sequences   373.0  deficit index 0.284
+  default              effective sequences   344.6  deficit index 0.305
+  unverified_trusted   effective sequences   373.1  deficit index 0.284
   non_contradiction    effective sequences   661.5  deficit index 0.249
   strict               effective sequences   202.2  deficit index 0.376
   lenient              effective sequences   488.5  deficit index 0.272

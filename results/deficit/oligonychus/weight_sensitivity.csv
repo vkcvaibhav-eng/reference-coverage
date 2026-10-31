@@ -1,8 +1,8 @@
 scheme,mean_weight,effective_records,deficit_index
 naive,1.0,178.0,0.7029
-default,0.8441,150.2,0.7447
-unverified_trusted,0.861,153.2,0.7372
-non_contradiction,0.9087,161.8,0.713
+default,0.8441,150.25,0.7447
+unverified_trusted,0.861,153.25,0.7372
+non_contradiction,0.9087,161.75,0.713
 strict,0.7921,141.0,0.7633
 lenient,0.8961,159.5,0.7288
 anchored_only,0.7921,141.0,0.7633
