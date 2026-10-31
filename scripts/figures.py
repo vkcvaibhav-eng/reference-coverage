@@ -54,7 +54,8 @@ def fig_climate_space(dd, outdir):
     pc1, pc2 = g("pc1"), g("pc2")
     ext = [pc1.min(), pc1.max(), pc2.min(), pc2.max()]
 
-    fig, axes = plt.subplots(1, 3, figsize=(DOUBLE, DOUBLE / 3.1))
+    fig, axes = plt.subplots(1, 3, figsize=(DOUBLE, DOUBLE / 2.9))
+    fig.subplots_adjust(wspace=0.55)
     panels = [
         ("occurrence_density", "Occurrence density", "Greys", None),
         ("coverage_weighted", "Verifiable coverage", "viridis", (0, 1)),
@@ -69,10 +70,12 @@ def fig_climate_space(dd, outdir):
                    colors="white", linewidths=0.4, alpha=0.6)
         ax.set_title(title)
         ax.set_xlabel("PC1 of BIO1–BIO19")
-        cb = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.03)
-        cb.ax.tick_params(labelsize=6, width=0.5)
+        cb = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.06)
+        cb.ax.tick_params(labelsize=6, width=0.5, pad=1.5)
         cb.outline.set_linewidth(0.5)
     axes[0].set_ylabel("PC2 of BIO1–BIO19")
+    for ax in axes[1:]:                      # one y axis is enough for three panels
+        ax.tick_params(labelleft=False)
     for ax, lab in zip(axes, "abc"):
         ax.text(0.02, 0.97, f"({lab})", transform=ax.transAxes, va="top",
                 fontsize=8, fontweight="bold", color="black",
@@ -188,7 +191,7 @@ def fig_holdout(hd, outdir, min_train=150):
     a1.plot(yr, n_occ, "^--", color="#b2182b", ms=4, lw=1.0,
             label="Null: recorded range")
     a1.plot(yr, n_seq, "v--", color="#4d9221", ms=4, lw=1.0,
-            label="Null: existing sequencing")
+            label="Null: earlier reference records")
     a1.plot(yr[~thin], obs[~thin], "o-", color="#2b5d8a", ms=5, lw=1.3,
             label="Observed")
     a1.plot(yr[thin], obs[thin], "o-", color="#2b5d8a", ms=5, lw=1.3,
@@ -214,9 +217,9 @@ def fig_holdout(hd, outdir, min_train=150):
     a2.set_xlabel("Cutoff year")
     a2.set_ylabel("Observed / null (recorded range)")
     a2.set_ylim(0, max(1.35, ratio.max() * 1.12))
-    a2.text(0.5, 0.93, "sequencing ahead of the recorded range",
+    a2.text(0.5, 0.93, "later-collected records in less-covered climate",
             transform=a2.transAxes, ha="center", fontsize=6, color="0.35")
-    a2.text(0.5, 0.06, "sequencing behind the recorded range",
+    a2.text(0.5, 0.06, "later-collected records in better-covered climate",
             transform=a2.transAxes, ha="center", fontsize=6, color="0.35")
     for x, y_, n in zip(yr, ratio, ntr):
         a2.annotate(f"{n}", (x, y_), textcoords="offset points",

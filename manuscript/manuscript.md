@@ -13,16 +13,16 @@ V. K. Chaudhari^a,\*^, Abhishek Shukla^b^
 ## Highlights
 
 - Reference coverage is weighted by whether each species label can be verified
-- One quarter of Tetranychus rows were the same mite under a second identifier
+- Duplicate identifiers accounted for 25.3% of Tetranychus database rows
 - Verifiability raises the Tetranychus coverage deficit from 0.237 to 0.305
 - Candidate localities are ranked by one specimen's exact effect on that index
-- Later-collected mites sit in better covered climate than the record at large
+- Later-collected records sit in better covered climate than the record at large
 
 ---
 
 ## Abstract
 
-Gap analyses of DNA barcode reference libraries count records, presuming both that each record is a distinct specimen and that its label is correct. Neither is safe where morphological identification is hard and databases carry known misidentifications. We measure instead the *verifiable* coverage of a reference library across the climate space in which a taxon is recorded. Records are first resolved to specimens, since GenBank and BOLD hold the same mite under different identifiers. Each specimen carries a weight for whether its label can be confirmed against a morphologically identified anchor, with an equal-ambiguity convention of 1/k for a cluster holding k anchored species. The deficit index is the share of recorded occurrence outside coverage; localities are ranked by the exact fall in that index when one verified specimen is added. For *Tetranychus*, 974 georeferenced COI rows resolved to 728 specimens, 25.3% of rows being redundant, and resolution raised the verdict-match rate from 70.6% to 94.8%. Weighting left 344.6 effective specimens and raised the deficit index from 0.237 to 0.305, a relative widening of 28.6% that held between 28.6% and 35.1% across coverage scales from k = 1 to k = 20. *Oligonychus*, 44.6% of whose rows were redundant, gave 0.703 and 0.745. A retrospective split on collection year placed later-collected mites in significantly better covered climate than the recorded range. The quantity is verifiability, not accuracy: 90.9% of checkable labels were not contradicted, but most sit in clusters that do not resolve to one species.
+Gap analyses of DNA barcode reference libraries count records, presuming both that each record is a distinct specimen and that its label is correct. Neither is safe where morphological identification is hard and databases carry known misidentifications. We measure instead the *verifiable* coverage of a reference library across the climate space in which a taxon is recorded. Records are first resolved to specimens, since GenBank and BOLD index the same material under different identifiers. Each specimen carries a weight for whether its label can be confirmed against a morphologically identified anchor, with an equal-ambiguity convention of 1/k for a cluster holding k anchored species. The deficit index is the occurrence-density-weighted mean shortfall in the coverage score; localities are ranked by the exact fall in that index when one verified specimen is added. For *Tetranychus*, 974 georeferenced COI rows resolved to 728 specimens, 25.3% of rows being redundant, and resolution raised the verdict-match rate from 70.6% to 94.8%. Weighting left 344.6 effective specimens and raised the deficit index from 0.237 to 0.305, a relative increase of 28.6%; the weighted index exceeded the counted index at every coverage scale from k = 1 to k = 20, by 28.6% to 35.1%. *Oligonychus*, 44.6% of whose rows were redundant, gave 0.703 and 0.745. A retrospective split on collection year placed later-collected records in significantly better covered climate than the recorded range. The quantity is verifiability, not accuracy: 90.9% of checkable labels were not contradicted, but most sit in clusters that do not resolve to one species.
 
 **Keywords:** DNA barcoding; COI; reference library; coverage; Tetranychidae; biodiversity informatics
 
@@ -95,7 +95,7 @@ WorldClim 2.1 bioclimatic variables BIO1–BIO19 at 10 arc-minute resolution (Fi
 
 Occurrence and reference records were summarised as Gaussian densities on the grid, the reference density weighted by verifiability. Smoothing covariance is held fixed across weight schemes. This matters: a kernel density estimator that sets its bandwidth from the weighted effective sample size spreads credit differently as well as awarding less of it, so weighted and unweighted surfaces would differ in smoothing as well as in evidence. The covariance is computed once from the unweighted reference points by Scott's rule and reused for every scheme.
 
-Writing *A* for the area of one kernel bandwidth, 2π√det(**H**), and *N* for the sum of verifiability weights, the expected number of verifiable specimens within one bandwidth of a point *z* is
+Writing *A* for the area of one kernel bandwidth, 2π√det(**H**), and *N* for the sum of verifiability weights, the local kernel-weighted reference support at climate position *z* is
 
 λ(*z*) = *N* · *f*(*z*) · *A*
 
@@ -103,7 +103,7 @@ and the coverage score saturates as that number approaches a stated scale *k*:
 
 *C*(*z*) = 1 − exp(−λ(*z*)/*k*)
 
-Because *N* is a sum of weights rather than a count, reducing confidence in labels lowers the score in absolute terms rather than redistributing it. Two qualifications attach. λ is a sum of distance-decaying kernel similarities, not a count of specimens inside a hard boundary; and at λ = *k* the score is 0.632, so *k* is a saturation scale rather than a threshold. The deficit index is the occurrence-weighted mean shortfall,
+Because *N* is a sum of weights rather than a count, reducing confidence in labels lowers the score in absolute terms rather than redistributing it. Two qualifications attach. λ is a sum of distance-decaying kernel similarities, not a count of specimens inside a hard boundary, so it is a measure of local support rather than a tally; and at λ = *k* the score is 0.632, so *k* is a saturation scale rather than a threshold. The deficit index is the occurrence-weighted mean shortfall,
 
 *D* = ∫ *p*(*z*)(1 − *C*(*z*)) d*z*
 
@@ -123,11 +123,11 @@ Two nulls were used, each resampling with equal probability, 2,000 draws, the un
 
 ### 2.8. Sensitivity
 
-Weight schemes spanned a counted scheme in which every specimen contributes fully, strict and lenient variants, an anchored-only scheme, a scheme crediting unverified specimens in full, and a uniform non-contradiction scenario in which every weight is replaced by the observed rate at which checkable labels were not contradicted. That last is a sensitivity scenario, not a demonstrated lower bound. The coverage scale *k* was swept from 1 to 20. Each run also reports the index with unverified specimens credited in full and discarded, which bounds the treatment of those 38 specimens but not all uncertainty in the weights.
+Weight schemes spanned a counted scheme in which every specimen contributes fully, strict and lenient variants, an anchored-only scheme, a scheme crediting records without matched verdicts in full, and a uniform non-contradiction scenario in which every weight is replaced by the observed rate at which checkable labels were not contradicted. That last is a sensitivity scenario, not a demonstrated lower bound. The coverage scale *k* was swept from 1 to 20. Each run also reports the index with those records credited in full and discarded, which bounds the treatment of those 38 reference records without matched verdicts, not all uncertainty in the weights.
 
 ### 2.9. Software and data availability
 
-The workflow is implemented in Python 3.12 using NumPy, SciPy, rasterio and Biopython, with 30 automated tests. All figures and every numerical statement in this manuscript are generated from the released result tables by scripts in the repository; no value is transcribed by hand. `fetch_gbif.py`, `deficit.py` and `holdout.py` take a taxon name as an argument; the remaining scripts operate on whatever the preceding steps produced. Applying the framework to another taxon requires GBIF and sequence inputs for that taxon and an equivalent per-record verification, not changes to the code.
+The workflow is implemented in Python 3.12 using NumPy, SciPy, rasterio and Biopython, with 30 automated tests. The repository provides the analysis code, automated tests, figure-generation scripts and machine-readable numerical summaries; Table 1 and the figures are emitted by those scripts, and the numerical statements in the text were cross-checked against the summaries. `fetch_gbif.py`, `deficit.py` and `holdout.py` take a taxon name as an argument; the remaining scripts operate on whatever the preceding steps produced. Applying the framework to another taxon requires GBIF and sequence inputs for that taxon and an equivalent per-record verification, not changes to the code.
 
 ## 3. Results
 
@@ -145,12 +145,12 @@ Counting specimens gave a deficit index of **0.237**. Weighting by verifiability
 **Fig. 1.** Climate space of *Tetranychus* on the first two principal components of BIO1–BIO19. (a) Occurrence density from 9,061 georeferenced records, of which 8,965 are GBIF occurrences and 96 are reference records reclassified as non-barcode. (b) Verifiable coverage score from 728 specimens weighted by verifiability, at a saturation scale of five verifiable specimens per kernel bandwidth. (c) The resulting coverage deficit, the product of occurrence mass and the shortfall in the coverage score. White contours show occurrence density in all three panels.
 
 
-The widening was stable across the coverage scale: across *k* = 1, 3, 5, 10 and 20 the relative widening ranged only from 28.6% to 35.1% while the index itself rose from 0.095 to 0.447 counted and 0.128 to 0.576 weighted (Fig. 2b).
+The weighted deficit exceeded the counted deficit at every tested coverage scale, with relative increases ranging from 28.6% to 35.1%; across *k* = 1, 3, 5, 10 and 20 the index itself rose from 0.095 to 0.447 counted and 0.128 to 0.576 weighted (Fig. 2b).
 
-The 38 specimens without a verdict make little difference. Crediting them in full gave 0.284 and discarding them gave 0.315, both above the counted 0.237. The uniform non-contradiction scenario, in which every weight becomes 0.909, gave 0.249 (Fig. 2a). An anchored-only scheme, retaining 132 effective specimens, gave 0.476.
+The 38 records without a matched verdict make little difference. Crediting them in full gave 0.284 and discarding them gave 0.315, both above the counted 0.237. The uniform non-contradiction scenario, in which every weight becomes 0.909, gave 0.249 (Fig. 2a). An anchored-only scheme, retaining 132 effective specimens, gave 0.476.
 ![Fig2](figs/Fig3_sensitivity.png)
 
-**Fig. 2.** Sensitivity of the deficit index. (a) Weight schemes, with effective specimen counts in parentheses; the dashed line is the counted index of 0.237. (b) Coverage scale *k* swept from 1 to 20, with the relative widening between the counted and weighted indices annotated at each value. The widening ranges only from 28.6% to 35.1% while the index itself more than quadruples.
+**Fig. 2.** Sensitivity of the deficit index. (a) Weight schemes, with effective specimen counts in parentheses; the dashed line is the counted index of 0.237. (b) Coverage scale *k* swept from 1 to 20, with the relative widening between the counted and weighted indices annotated at each value. Relative increases range from 28.6% to 35.1% while the index itself more than quadruples.
 
 
 ### 3.3. Where the gaps are
@@ -167,22 +167,22 @@ The ranking is not a ranking by shortfall. The second cell holds six occurrence 
 
 At the 2015 cutoff, 354 training specimens gave a deficit index of 0.565, and the 289 specimens collected afterwards fell at a mean uncovered fraction of 0.420. A resample of the pre-cutoff occurrence records expected 0.546 and a resample of the pre-cutoff reference specimens expected 0.109.
 
-Across the five cutoffs with a training library of at least 150 specimens — 2014, 2015, 2016, 2018 and 2020 — later-collected mites fell in **significantly less** uncovered climate than a resample of the recorded range, with lower-tail *p* = 0.0005 at every cutoff and ratios to that null of 0.775, 0.769, 0.806, 0.674 and 0.540 (Fig. 4). Against the already-sequenced null the direction reverses at every cutoff: later specimens sat in more uncovered climate than the existing reference collection.
+Across the five cutoffs with a training library of at least 150 specimens — 2014, 2015, 2016, 2018 and 2020 — later-collected records fell in **significantly less** uncovered climate than a resample of the recorded range, with lower-tail *p* = 0.0005 at every cutoff and ratios to that null of 0.775, 0.769, 0.806, 0.674 and 0.540 (Fig. 4). Against the already-sequenced null the direction reverses at every cutoff: later specimens sat in more uncovered climate than the existing reference collection.
 
 
 ![Fig4](figs/Fig4_holdout.png)
 
-**Fig. 4.** Retrospective comparison by collection year. (a) Mean uncovered fraction of later-collected specimens against both nulls; the shaded band marks cutoffs whose training library held fewer than 150 specimens. (b) The same result as a ratio to the recorded-range null, with training library size printed below each point. Values below one indicate later-collected mites falling in better-covered climate than a resample of the recorded range. Cutoffs share records and are not independent.
+**Fig. 4.** Retrospective comparison by collection year. (a) Mean uncovered fraction of later-collected specimens against both nulls; the shaded band marks cutoffs whose training library held fewer than 150 specimens. (b) The same result as a ratio to the recorded-range null, with training library size printed below each point. Values below one indicate later-collected records falling in better-covered climate than a resample of the recorded range. Cutoffs share records and are not independent.
 
 Collecting that supplied later reference specimens has therefore concentrated in climates already better covered than the recorded range at large, while still extending beyond the climates where reference specimens had previously been drawn. The cutoffs share records and are not independent, and records from the same study or locality were not resampled as blocks.
 
 ### 3.5. *Oligonychus*
 
-The *Oligonychus* analysis used 2,976 records: 2,798 occurrence records and 178 specimens resolved from 321 rows, 44.6% of which were redundant. Of the 178 specimens, 174 carried a verdict, a match rate of 97.8%; 141 agreed with an anchor, 33 had no anchor available, and none fell in a shared cluster. Mean verifiability was 0.844, giving 150.3 effective specimens.
+The *Oligonychus* analysis used 2,976 records: 2,798 occurrence records and 178 specimens resolved from 321 rows, 44.6% of which were redundant. Of the 178 specimens, 174 carried a matched verdict, 97.8%; of those, 141 agreed with an anchor and 33 recorded that no anchor was available, so 79.2% of specimens have positive anchor support rather than 97.8%. None fell in a shared cluster. Mean verifiability was 0.844, giving 150.3 effective specimens.
 
 The deficit index was **0.703** counted and **0.745** weighted, a relative widening of 5.9%, with bounds of 0.737 and 0.748. A coverage score below 0.10 covered 1,704 of 2,798 occurrence records, 60.9%, against 9.0% in *Tetranychus*. No cutoff reached the 150-specimen adequacy threshold, so no retrospective comparison is reported for this genus.
 
-The two genera differ in an instructive way. *Oligonychus* is the better-verified library — 97.8% of specimens carry a verdict and mean verifiability is 0.844, against 94.8% and 0.473 in *Tetranychus* — and the weighting accordingly changes its index less. It is nonetheless far more poorly covered, because it is a smaller library spread across climate space in which three-fifths of occurrence records score below 0.10.
+The two genera differ in an instructive way. *Oligonychus* is the library with more complete verdict matching and a higher mean evidential weight — 97.8% of its specimens carry a matched verdict and mean verifiability is 0.844, against 94.8% and 0.473 in *Tetranychus* — and the weighting accordingly changes its index less. It is nonetheless far more poorly covered, because it is a smaller library spread across climate space in which three-fifths of occurrence records score below 0.10.
 
 ## 4. Discussion
 
@@ -194,7 +194,7 @@ This bears beyond the present analysis. BOLD deposits to GenBank, so any assessm
 
 ### 4.2. What the weighting changes, and what it does not
 
-Weighting by verifiability widened the measured gap in *Tetranychus* COI coverage by 28.6%, and the widening held across every coverage scale and every treatment of unverified specimens tested. It is not a finding that public labels are wrong. In this dataset 90.9% of checkable labels were not contradicted, broadly consistent with the general picture for metazoan mitochondrial sequences (Leray et al., 2019) and with the view that reported identification failures often originate in sequence handling rather than in the libraries (Pentinsaari et al., 2020).
+Weighting by verifiability widened the measured gap in *Tetranychus* COI coverage by 28.6%, and the weighted index exceeded the counted index at every coverage scale and under every treatment of records without matched verdicts tested. It is not a finding that public labels are wrong. In this dataset 90.9% of checkable labels were not contradicted, broadly consistent with the general picture for metazoan mitochondrial sequences (Leray et al., 2019) and with the view that reported identification failures often originate in sequence handling rather than in the libraries (Pentinsaari et al., 2020).
 
 The uniform non-contradiction scenario makes the boundary explicit. When every weight is replaced by the bare rate at which labels escape contradiction, the index falls to 0.249 against a counted 0.237 — most of the effect disappears. A framework claiming to measure accuracy would collapse at that point. What survives is the narrower claim: a library user cannot distinguish an unverifiable label that is correct from one that is not, so unverifiable records cannot carry the weight of a reference.
 
@@ -214,7 +214,7 @@ Three limits on interpretation follow from how coverage is computed. Coverage is
 
 ### 4.5. The retrospective comparison
 
-Later-collected mites sat in significantly less uncovered climate than a resample of the recorded range at every cutoff with an adequate training library. The pattern is that collecting which supplied reference specimens has concentrated where the library was already comparatively strong rather than in the climates it lacked. We have not tested why. Proximity to institutions, concentration in well-studied agricultural regions and existing collaborations are plausible explanations, and each would need its own test.
+Later-collected records sat in significantly less uncovered climate than a resample of the recorded range at every cutoff with an adequate training library. The pattern is that collecting which supplied reference specimens has concentrated where the library was already comparatively strong rather than in the climates it lacked. We have not tested why. Proximity to institutions, concentration in well-studied agricultural regions and existing collaborations are plausible explanations, and each would need its own test.
 
 The comparison is retrospective and narrow in scope. It splits on collection date, so it describes where specimens were gathered, not when they were sequenced or deposited, and it cannot support a claim about how sequencing effort has changed. Cutoffs share records, so the five results are dependent observations of one pattern. The representation and anchor information are fitted on the full dated set, so this is not a prospective validation. And the comparison against the already-sequenced null runs the other way: later specimens did extend beyond the climates from which reference specimens had previously been drawn, just not as far as the recorded range itself extends.
 
@@ -226,7 +226,7 @@ Marker eligibility rests on deposited gene or marker fields rather than on align
 
 ## 5. Conclusions
 
-Public COI reference libraries are routinely assessed by counting records, which presumes both that each record is a distinct specimen and that its species label is correct. Neither presumption held here. A quarter of *Tetranychus* rows and nearly half of *Oligonychus* rows were the same mite under a second identifier, and resolving them raised the *Tetranychus* verdict-match rate from 70.6% to 94.8%. Weighting the resulting specimens by verifiability then raised the climate-space coverage deficit from 0.237 to 0.305, a widening that persisted at every coverage scale tested and under both extreme treatments of the 38 remaining unverified specimens. *Oligonychus*, a better-verified but much smaller library, returned 0.703 and 0.745 with three-fifths of its occurrence records in climate scoring below 0.10 coverage. A retrospective split on collection year placed later-collected mites in significantly better-covered climate than the recorded range at large. The quantity measured is verifiable coverage within a genus, not species-level accuracy and not species-specific reference support: 90.9% of checkable labels were not contradicted, but most of those sit in clusters that do not resolve to one species, and a library user cannot tell which.
+Public COI reference libraries are routinely assessed by counting records, which presumes both that each record is a distinct specimen and that its species label is correct. Neither presumption held here. A quarter of *Tetranychus* rows and nearly half of *Oligonychus* rows were a second identifier for material already present, and resolving them raised the *Tetranychus* verdict-match rate from 70.6% to 94.8%. Weighting the resulting specimens by verifiability then raised the climate-space coverage deficit from 0.237 to 0.305, a widening that persisted at every coverage scale tested and under both extreme treatments of the 38 reference records without matched verdicts. *Oligonychus*, a better-verified but much smaller library, returned 0.703 and 0.745 with three-fifths of its occurrence records in climate scoring below 0.10 coverage. A retrospective split on collection year placed later-collected records in significantly better-covered climate than the recorded range at large. The quantity measured is verifiable coverage within a genus, not species-level accuracy and not species-specific reference support: 90.9% of checkable labels were not contradicted, but most of those sit in clusters that do not resolve to one species, and a library user cannot tell which.
 
 ---
 
