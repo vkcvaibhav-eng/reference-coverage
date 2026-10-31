@@ -29,7 +29,10 @@ WANTED = {
     "anchor_status.csv",
     "record_checks.csv",
     "cluster_anchors.csv",
+    "merged_records.csv",      # the accession <-> process-ID crosswalk
 }
+# Files the analysis cannot run without.
+REQUIRED = {"record_anchor_check.csv", "merged_records.csv"}
 OUT = os.path.join("data", "external")
 
 # The sequence-side raw data, taken from the same frozen deposit so that the
@@ -61,19 +64,29 @@ def is_raw_sequence(name):
             and "query" not in base)
 
 
-def save(name, blob, found, directory=None):
-    """Write a deposit member, keeping its folder so same-named files survive.
+def flatten(member):
+    """Full relative path as one filename, so no two members can collide.
 
-    Several genera ship a record_anchor_check.csv of their own; saving by
-    basename alone silently kept whichever arrived first and discarded the rest.
+    Prefixing only the immediate parent is not enough: every genus files its
+    anchor table under a folder called "anchors", so results/anchors/x.csv and
+    results/oligonychus/anchors/x.csv both reduce to anchors__x.csv and one
+    silently overwrites the other. The whole path is kept instead.
     """
+    parts = [p for p in member.replace("\\", "/").split("/")
+             if p not in ("", ".", "..")]
+    while parts and parts[0] in ("results", "data"):
+        parts = parts[1:]
+    return "__".join(parts) if parts else os.path.basename(member)
+
+
+def save(name, blob, found, directory=None):
     directory = directory or OUT
-    stem = os.path.basename(name)
-    parent = os.path.basename(os.path.dirname(name.rstrip("/")))
-    if parent and parent not in ("", ".", "results", "data"):
-        stem = f"{parent}__{stem}"
+    stem = flatten(name)
     os.makedirs(directory, exist_ok=True)
     path = os.path.join(directory, stem)
+    if stem in found:
+        sys.exit(f"Name collision writing {name} as {stem}; refusing to "
+                 f"overwrite. Report this as a bug.")
     with open(path, "wb") as f:
         f.write(blob)
     found.add(stem)
@@ -127,6 +140,7 @@ def main():
 
     missing = {w for w in WANTED
                if not any(f == w or f.endswith("__" + w) for f in found)}
+    absent_required = {w for w in REQUIRED if w in missing}
     with open(os.path.join(OUT, "zenodo_source.txt"), "w") as f:
         f.write(f"record_id\t{rid}\ndoi\t{doi}\ntitle\t{title}\n"
                 f"version\t{version}\nfetched\t{', '.join(sorted(found))}\n")
@@ -135,6 +149,11 @@ def main():
         sys.exit("No wanted tables found in the deposit. Check the record id.")
     if missing:
         print(f"Not in the deposit: {', '.join(sorted(missing))}")
+    if absent_required:
+        sys.exit(f"Required input missing from the deposit: "
+                 f"{', '.join(sorted(absent_required))}. The analysis resolves "
+                 f"records to specimens using the crosswalk and cannot run "
+                 f"without it.")
     print(f"{len(found)} table(s) in {OUT}/")
 
 

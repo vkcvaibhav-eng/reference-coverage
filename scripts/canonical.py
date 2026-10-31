@@ -21,8 +21,7 @@ import re
 
 CROSSWALK_GLOBS = (
     os.path.join("data", "external", "*merged_records.csv"),
-    os.path.join("data", "external", "merged_records.csv"),
-    os.path.join("data", "derived", "merged_records.csv"),
+    os.path.join("data", "derived", "*merged_records.csv"),
 )
 ID_FIELDS = ("record_id", "genbank_accession", "bold_processid")
 VERSION = re.compile(r"\.\d+$")
@@ -35,15 +34,20 @@ def normalise(identifier):
 
 
 def crosswalk_rows():
+    """Every crosswalk found, across all genera. Missing ones are an error."""
+    rows, files = [], []
     for pattern in CROSSWALK_GLOBS:
-        hits = sorted(glob.glob(pattern))
-        if hits:
-            rows = []
-            for path in hits:
-                with open(path) as f:
-                    rows += list(csv.DictReader(f))
-            return rows
-    return []
+        for path in sorted(glob.glob(pattern)):
+            files.append(path)
+            with open(path) as f:
+                rows += list(csv.DictReader(f))
+    if not rows:
+        raise FileNotFoundError(
+            "No accession/process-ID crosswalk found under data/external/. "
+            "Records cannot be resolved to specimens without it; run "
+            "fetch_zenodo.py first.")
+    crosswalk_rows.files = files
+    return rows
 
 
 def build_aliases():
