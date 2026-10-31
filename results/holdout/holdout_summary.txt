@@ -1,13 +1,13 @@
 climate table              data/derived/climate_worldclim_10m.csv
 cutoff year                2015
-training set               occurrence 2489, sequence 742
-test set                   579 sequence records after 2015
-verdicts matched (train)   481/742
-PCA variance explained     PC1 43.7%, PC2 23.3%
-training deficit index     0.374
+training set               occurrence 9745, sequence 823
+test set                   669 sequence records after 2015
+verdicts matched (train)   481/823
+PCA variance explained     PC1 49.3%, PC2 24.2%
+training deficit index     0.537
 
-mean uncovered fraction at post-2015 sequence locations  0.355
-null 'occurrence'  0.226  [0.206, 0.247]  one-sided p 0.0005
-null 'sequencing'  0.081  [0.071, 0.092]  one-sided p 0.0005
+mean uncovered fraction at post-2015 sequence locations  0.388
+null 'occurrence'  0.482  [0.453, 0.512]  one-sided p 1.0000
+null 'sequencing'  0.087  [0.076, 0.100]  one-sided p 0.0005
 
-reading: post-cutoff sequencing targeted the gaps, against both nulls
+reading: post-cutoff sequencing did no better than sampling the recorded range at random

@@ -1,0 +1,15 @@
+source file                data/raw/gbif_tetranychus_genus.csv
+records in                 15793
+maximum uncertainty        50000 m
+photograph records         held back
+
+removed, no_coordinate            3894
+removed, fatal_issue              133
+removed, centroid_like            1227
+removed, equal_lat_lon            0
+removed, integer_coordinate       36
+removed, uncertain                26
+photograph-based           854
+records out                9623
+cleaned file               data/raw/gbif_tetranychus_genus_clean.csv
+photograph file            data/raw/gbif_tetranychus_genus_observations.csv

@@ -1,0 +1,8 @@
+mode	download
+taxon	Oligonychus
+taxonKey	7871727
+downloadKey	0019101-261023074918325
+doi	10.15468/dl.xxfcra
+records	4706
+retrieved	2026-10-31
+

@@ -1,0 +1,8 @@
+mode	download
+taxon	Tetranychus urticae
+taxonKey	2130185
+downloadKey	0019093-261023074918325
+doi	10.15468/dl.5mckab
+records	6646
+retrieved	2026-10-31
+

@@ -1,0 +1,8 @@
+mode	download
+taxon	Tetranychus
+taxonKey	2130777
+downloadKey	0019099-261023074918325
+doi	10.15468/dl.aejp4w
+records	15793
+retrieved	2026-10-31
+
