@@ -1,6 +1,6 @@
 climate table            data/derived/climate_worldclim_10m.csv
 genus filter             Tetranychus
-records used             10643 (occurrence 9915, sequence specimens 728)
+records used             9789 (occurrence 9061, sequence specimens 728)
 duplicates collapsed     246 rows (101 with conflicting coordinates)
 crosswalk aliases        4502
 moved to occurrence      94 COI-3P, 1 CYTB, 1 18S
@@ -9,39 +9,39 @@ mean verifiability       0.473
 effective sequences      344.5 of 728 records
 coverage threshold       5 verifiable sequences per neighbourhood
 shared-cluster weight    derived as 1/k from the anchored species per cluster (2012 records)
-PCA variance explained   PC1 47.2%, PC2 24.7%
+PCA variance explained   PC1 47.7%, PC2 25.0%
 
 non-contradiction rate  0.909 of 1720 checkable labels were not contradicted (157 were)
 
-deficit index, naive     0.258
-deficit index, weighted  0.327
-inflation of the gap     +0.069 (+26.9% relative)
+deficit index, naive     0.237
+deficit index, weighted  0.305
+inflation of the gap     +0.068 (+28.6% relative)
 bounds:
-  0.306 unverified records trusted in full
-  0.337 unverified records discarded
+  0.284 unverified records trusted in full
+  0.315 unverified records discarded
 
-occurrence records in climate space with <10% effective coverage: 911/9915 (9.2%)
-geographic cells (2 degrees) holding occurrences: 655
+occurrence records in climate space with <10% effective coverage: 819/9061 (9.0%)
+geographic cells (2 degrees) holding occurrences: 611
 
 weight sensitivity:
-  naive                effective sequences   728.0  deficit index 0.258
-  default              effective sequences   344.5  deficit index 0.327
-  unverified_trusted   effective sequences   373.0  deficit index 0.306
-  non_contradiction    effective sequences   661.5  deficit index 0.270
-  strict               effective sequences   202.2  deficit index 0.396
-  lenient              effective sequences   488.5  deficit index 0.293
-  anchored_only        effective sequences   132.0  deficit index 0.493
+  naive                effective sequences   728.0  deficit index 0.237
+  default              effective sequences   344.5  deficit index 0.305
+  unverified_trusted   effective sequences   373.0  deficit index 0.284
+  non_contradiction    effective sequences   661.5  deficit index 0.249
+  strict               effective sequences   202.2  deficit index 0.376
+  lenient              effective sequences   488.5  deficit index 0.272
+  anchored_only        effective sequences   132.0  deficit index 0.476
 
 coverage-threshold sensitivity (naive -> weighted):
-      1  0.097 -> 0.134  (+38.8% inflation)
-      3  0.196 -> 0.253  (+29.2% inflation)
-      5  0.258 -> 0.327  (+26.9% inflation)
-     10  0.356 -> 0.449  (+26.4% inflation)
-     20  0.473 -> 0.596  (+25.9% inflation)
+      1  0.095 -> 0.128  (+35.1% inflation)
+      3  0.181 -> 0.235  (+29.9% inflation)
+      5  0.237 -> 0.305  (+28.6% inflation)
+     10  0.329 -> 0.425  (+29.2% inflation)
+     20  0.447 -> 0.576  (+29.0% inflation)
 
 top 5 priorities by exact deficit reduction:
-  1. US (30 to 32, -92 to -90)  deficit reduction 0.00779
-  2. PT (38 to 40, -28 to -26)  deficit reduction 0.00773
-  3. AU (-34 to -32, 152 to 154)  deficit reduction 0.00770
-  4. PT (38 to 40, -30 to -28)  deficit reduction 0.00761
-  5. JP (34 to 36, 130 to 132)  deficit reduction 0.00717
+  1. NC (-24 to -22, 166 to 168)  deficit reduction 0.00636
+  2. JP (32 to 34, 132 to 134)  deficit reduction 0.00627
+  3. RE (-22 to -20, 54 to 56)  deficit reduction 0.00623
+  4. US (30 to 32, -92 to -90)  deficit reduction 0.00622
+  5. AU (-34 to -32, 152 to 154)  deficit reduction 0.00621

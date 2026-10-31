@@ -1,46 +1,47 @@
 climate table            data/derived/climate_worldclim_10m.csv
 genus filter             none (genera pooled)
-records used             15478 (occurrence 13605, sequence 1873)
+records used             14046 (occurrence 12671, sequence specimens 1375)
+duplicates collapsed     498 rows (249 with conflicting coordinates)
+crosswalk aliases        4502
 moved to occurrence      94 COI-3P, 2 18S, 1 CYTB
-verdicts matched         1068/1873 (805 took the default weight of 0.25)
-mean verifiability       0.323
-effective sequences      604.2 of 1873 records
+verdicts matched         1325/1375 (50 took the default weight of 0.25)
+mean verifiability       0.426
+effective sequences      586.0 of 1375 records
 coverage threshold       5 verifiable sequences per neighbourhood
-shared-cluster weight    derived as 1/k from the anchored species per cluster (1700 records)
-PCA variance explained   PC1 47.0%, PC2 24.2%
+shared-cluster weight    derived as 1/k from the anchored species per cluster (2012 records)
+PCA variance explained   PC1 47.2%, PC2 24.6%
 
-label accuracy (context) 0.912 of 1412 checkable labels stood (124 contradicted)
+non-contradiction rate  0.909 of 1720 checkable labels were not contradicted (157 were)
 
-deficit index, naive     0.181
-deficit index, weighted  0.268
-inflation of the gap     +0.087 (+48.0% relative)
+deficit index, naive     0.188
+deficit index, weighted  0.287
+inflation of the gap     +0.099 (+52.6% relative)
 bounds:
-  0.189 unverified records trusted in full
-  0.295 unverified records discarded
-  0.183 FLOOR: every weight set to the chance the label is merely correct
+  0.269 unverified records trusted in full
+  0.296 unverified records discarded
 
-occurrence records in climate space with <10% effective coverage: 978/13605 (7.2%)
-geographic cells (2 degrees) holding occurrences: 743
+occurrence records in climate space with <10% effective coverage: 942/12671 (7.4%)
+geographic cells (2 degrees) holding occurrences: 700
 
 weight sensitivity:
-  naive                effective sequences  1873.0  deficit index 0.181
-  default              effective sequences   604.2  deficit index 0.268
-  unverified_trusted   effective sequences  1207.9  deficit index 0.189
-  label_accuracy       effective sequences  1344.2  deficit index 0.183
-  strict               effective sequences   201.8  deficit index 0.311
-  lenient              effective sequences  1017.0  deficit index 0.232
-  anchored_only        effective sequences   132.0  deficit index 0.376
+  naive                effective sequences  1375.0  deficit index 0.188
+  default              effective sequences   586.0  deficit index 0.287
+  unverified_trusted   effective sequences   623.5  deficit index 0.269
+  non_contradiction    effective sequences  1249.5  deficit index 0.199
+  strict               effective sequences   343.2  deficit index 0.401
+  lenient              effective sequences   839.0  deficit index 0.239
+  anchored_only        effective sequences   273.0  deficit index 0.489
 
 coverage-threshold sensitivity (naive -> weighted):
-      1  0.065 -> 0.102  (+56.5% inflation)
-      3  0.132 -> 0.203  (+54.0% inflation)
-      5  0.181 -> 0.268  (+48.0% inflation)
-     10  0.266 -> 0.378  (+42.5% inflation)
-     20  0.368 -> 0.515  (+39.8% inflation)
+      1  0.066 -> 0.113  (+72.0% inflation)
+      3  0.137 -> 0.219  (+59.8% inflation)
+      5  0.188 -> 0.287  (+52.6% inflation)
+     10  0.274 -> 0.402  (+46.6% inflation)
+     20  0.382 -> 0.536  (+40.2% inflation)
 
-top 5 sampling priorities:
-  1. AU (-14, 130)  uncovered mass 256.4215
-  2. RE (-22, 54)  uncovered mass 250.7837
-  3. AU (-34, 150)  uncovered mass 107.2963
-  4. JP (36, 136)  uncovered mass 64.1413
-  5. SC (-6, 54)  uncovered mass 56.7917
+top 5 priorities by exact deficit reduction:
+  1. RE (-22 to -20, 54 to 56)  deficit reduction 0.00535
+  2. BR (-26 to -24, -48 to -46)  deficit reduction 0.00534
+  3. NC (-22 to -20, 166 to 168)  deficit reduction 0.00530
+  4. NC (-24 to -22, 166 to 168)  deficit reduction 0.00529
+  5. NC (-22 to -20, 164 to 166)  deficit reduction 0.00508

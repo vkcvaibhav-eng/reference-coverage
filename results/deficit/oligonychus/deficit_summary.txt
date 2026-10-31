@@ -1,6 +1,6 @@
 climate table            data/derived/climate_worldclim_10m.csv
 genus filter             Oligonychus
-records used             3056 (occurrence 2878, sequence specimens 178)
+records used             2976 (occurrence 2798, sequence specimens 178)
 duplicates collapsed     143 rows (100 with conflicting coordinates)
 crosswalk aliases        4502
 moved to occurrence      none
@@ -9,39 +9,39 @@ mean verifiability       0.844
 effective sequences      150.2 of 178 records
 coverage threshold       5 verifiable sequences per neighbourhood
 shared-cluster weight    derived as 1/k from the anchored species per cluster (2012 records)
-PCA variance explained   PC1 45.6%, PC2 25.7%
+PCA variance explained   PC1 45.7%, PC2 25.6%
 
 non-contradiction rate  0.909 of 1720 checkable labels were not contradicted (157 were)
 
-deficit index, naive     0.708
-deficit index, weighted  0.750
-inflation of the gap     +0.041 (+5.8% relative)
+deficit index, naive     0.703
+deficit index, weighted  0.745
+inflation of the gap     +0.042 (+5.9% relative)
 bounds:
-  0.742 unverified records trusted in full
-  0.753 unverified records discarded
+  0.737 unverified records trusted in full
+  0.748 unverified records discarded
 
-occurrence records in climate space with <10% effective coverage: 1739/2878 (60.4%)
-geographic cells (2 degrees) holding occurrences: 235
+occurrence records in climate space with <10% effective coverage: 1704/2798 (60.9%)
+geographic cells (2 degrees) holding occurrences: 220
 
 weight sensitivity:
-  naive                effective sequences   178.0  deficit index 0.708
-  default              effective sequences   150.2  deficit index 0.750
-  unverified_trusted   effective sequences   153.2  deficit index 0.743
-  non_contradiction    effective sequences   161.8  deficit index 0.718
-  strict               effective sequences   141.0  deficit index 0.768
-  lenient              effective sequences   159.5  deficit index 0.734
-  anchored_only        effective sequences   141.0  deficit index 0.768
+  naive                effective sequences   178.0  deficit index 0.703
+  default              effective sequences   150.2  deficit index 0.745
+  unverified_trusted   effective sequences   153.2  deficit index 0.737
+  non_contradiction    effective sequences   161.8  deficit index 0.713
+  strict               effective sequences   141.0  deficit index 0.763
+  lenient              effective sequences   159.5  deficit index 0.729
+  anchored_only        effective sequences   141.0  deficit index 0.763
 
 coverage-threshold sensitivity (naive -> weighted):
-      1  0.514 -> 0.592  (+15.2% inflation)
-      3  0.652 -> 0.707  (+8.4% inflation)
-      5  0.708 -> 0.750  (+5.8% inflation)
-     10  0.776 -> 0.802  (+3.3% inflation)
-     20  0.837 -> 0.851  (+1.7% inflation)
+      1  0.509 -> 0.587  (+15.2% inflation)
+      3  0.646 -> 0.701  (+8.5% inflation)
+      5  0.703 -> 0.745  (+5.9% inflation)
+     10  0.772 -> 0.798  (+3.3% inflation)
+     20  0.834 -> 0.848  (+1.7% inflation)
 
 top 5 priorities by exact deficit reduction:
-  1. MG (-20 to -18, 46 to 48)  deficit reduction 0.01259
-  2. BR (-22 to -20, -48 to -46)  deficit reduction 0.01255
-  3. KE (-2 to 0, 34 to 36)  deficit reduction 0.01246
-  4. BR (-20 to -18, -56 to -54)  deficit reduction 0.01244
-  5. MG (-26 to -24, 46 to 48)  deficit reduction 0.01234
+  1. MG (-20 to -18, 46 to 48)  deficit reduction 0.01274
+  2. BR (-22 to -20, -48 to -46)  deficit reduction 0.01269
+  3. KE (-2 to 0, 34 to 36)  deficit reduction 0.01251
+  4. MG (-26 to -24, 46 to 48)  deficit reduction 0.01245
+  5. BR (-24 to -22, -48 to -46)  deficit reduction 0.01210
