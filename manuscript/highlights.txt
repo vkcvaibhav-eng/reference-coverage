@@ -1,5 +1,5 @@
-Library coverage is weighted by whether each species label can be verified
-Verifiability raises the Tetranychus coverage deficit from 0.258 to 0.327
-One specimen's exact effect on the deficit index ranks candidate localities
-Specimens held under two identifiers inflate counts: 974 rows are 728 mites
-Later-collected specimens sit in better covered climate than the record at large
+Reference coverage is weighted by whether each species label can be verified
+One quarter of Tetranychus rows were the same mite under a second identifier
+Verifiability raises the Tetranychus coverage deficit from 0.237 to 0.305
+Candidate localities are ranked by one specimen's exact effect on that index
+Later-collected mites sit in better covered climate than the record at large

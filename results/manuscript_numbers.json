@@ -11,9 +11,9 @@
   "genera": {
     "Tetranychus": {
       "genus": "Tetranychus",
-      "records_used": 10643,
-      "occurrence_rows": 9915,
-      "occurrence_from_gbif": 9819,
+      "records_used": 9789,
+      "occurrence_rows": 9061,
+      "occurrence_from_gbif": 8965,
       "occurrence_reclassified": 96,
       "reclassified_by_marker": {
         "COI-3P": 94,
@@ -48,98 +48,98 @@
       },
       "mean_verifiability": 0.4733,
       "effective_specimens": 344.55,
-      "deficit_counted": 0.258,
-      "deficit_weighted": 0.327,
+      "deficit_counted": 0.237,
+      "deficit_weighted": 0.305,
       "pc1": null,
-      "training_deficit_2015": 0.566,
+      "training_deficit_2015": 0.565,
       "sweep_adequate": 5,
       "sweep_ratios": [
-        0.754,
-        0.744,
         0.775,
-        0.651,
-        0.529
+        0.769,
+        0.806,
+        0.674,
+        0.54
       ],
       "priorities": [
         {
           "rank": "1",
+          "lat_bin": "-24",
+          "lon_bin": "166",
+          "lat_range": "-24 to -22",
+          "lon_range": "166 to 168",
+          "country": "NC",
+          "occurrence_records": "136",
+          "uncovered_mass": "110.6133",
+          "mean_uncovered_fraction": "0.8133",
+          "deficit_reduction": "0.006364"
+        },
+        {
+          "rank": "2",
+          "lat_bin": "32",
+          "lon_bin": "132",
+          "lat_range": "32 to 34",
+          "lon_range": "132 to 134",
+          "country": "JP",
+          "occurrence_records": "6",
+          "uncovered_mass": "2.3742",
+          "mean_uncovered_fraction": "0.3957",
+          "deficit_reduction": "0.00627"
+        },
+        {
+          "rank": "3",
+          "lat_bin": "-22",
+          "lon_bin": "54",
+          "lat_range": "-22 to -20",
+          "lon_range": "54 to 56",
+          "country": "RE",
+          "occurrence_records": "177",
+          "uncovered_mass": "158.5735",
+          "mean_uncovered_fraction": "0.8959",
+          "deficit_reduction": "0.006234"
+        },
+        {
+          "rank": "4",
           "lat_bin": "30",
           "lon_bin": "-92",
           "lat_range": "30 to 32",
           "lon_range": "-92 to -90",
           "country": "US",
           "occurrence_records": "8",
-          "uncovered_mass": "4.4766",
-          "mean_uncovered_fraction": "0.5596",
-          "deficit_reduction": "0.007795"
+          "uncovered_mass": "4.4802",
+          "mean_uncovered_fraction": "0.56",
+          "deficit_reduction": "0.006217"
         },
         {
-          "rank": "2",
-          "lat_bin": "38",
-          "lon_bin": "-28",
-          "lat_range": "38 to 40",
-          "lon_range": "-28 to -26",
-          "country": "PT",
-          "occurrence_records": "22",
-          "uncovered_mass": "9.4604",
-          "mean_uncovered_fraction": "0.43",
-          "deficit_reduction": "0.007726"
-        },
-        {
-          "rank": "3",
+          "rank": "5",
           "lat_bin": "-34",
           "lon_bin": "152",
           "lat_range": "-34 to -32",
           "lon_range": "152 to 154",
           "country": "AU",
           "occurrence_records": "51",
-          "uncovered_mass": "20.6995",
-          "mean_uncovered_fraction": "0.4059",
-          "deficit_reduction": "0.007701"
-        },
-        {
-          "rank": "4",
-          "lat_bin": "38",
-          "lon_bin": "-30",
-          "lat_range": "38 to 40",
-          "lon_range": "-30 to -28",
-          "country": "PT",
-          "occurrence_records": "194",
-          "uncovered_mass": "107.218",
-          "mean_uncovered_fraction": "0.5527",
-          "deficit_reduction": "0.00761"
-        },
-        {
-          "rank": "5",
-          "lat_bin": "34",
-          "lon_bin": "130",
-          "lat_range": "34 to 36",
-          "lon_range": "130 to 132",
-          "country": "JP",
-          "occurrence_records": "1",
-          "uncovered_mass": "0.4785",
-          "mean_uncovered_fraction": "0.4785",
-          "deficit_reduction": "0.007168"
+          "uncovered_mass": "20.0591",
+          "mean_uncovered_fraction": "0.3933",
+          "deficit_reduction": "0.006211"
         },
         {
           "rank": "6",
-          "lat_bin": "36",
-          "lon_bin": "-26",
-          "lat_range": "36 to 38",
-          "lon_range": "-26 to -24",
-          "country": "PT",
-          "occurrence_records": "127",
-          "uncovered_mass": "47.6426",
-          "mean_uncovered_fraction": "0.3751",
-          "deficit_reduction": "0.007151"
+          "lat_bin": "32",
+          "lon_bin": "130",
+          "lat_range": "32 to 34",
+          "lon_range": "130 to 132",
+          "country": "JP",
+          "occurrence_records": "6",
+          "uncovered_mass": "2.3499",
+          "mean_uncovered_fraction": "0.3916",
+          "deficit_reduction": "0.006121"
         }
       ]
     },
     "Oligonychus": {
       "genus": "Oligonychus",
-      "records_used": 3056,
-      "occurrence_rows": 2878,
-      "occurrence_from_gbif": 2878,
+      "records_used": 2976,
+      "occurrence_rows": 2798,
+      "occurrence_from_gbif": 2798,
       "occurrence_reclassified": 0,
       "reclassified_by_marker": {},
       "specimens": 178,
@@ -170,8 +170,8 @@
       },
       "mean_verifiability": 0.8441,
       "effective_specimens": 150.25,
-      "deficit_counted": 0.708,
-      "deficit_weighted": 0.75,
+      "deficit_counted": 0.703,
+      "deficit_weighted": 0.745,
       "pc1": null,
       "training_deficit_2015": 0.992,
       "sweep_adequate": 0,
@@ -185,9 +185,9 @@
           "lon_range": "46 to 48",
           "country": "MG",
           "occurrence_records": "144",
-          "uncovered_mass": "137.186",
-          "mean_uncovered_fraction": "0.9527",
-          "deficit_reduction": "0.012585"
+          "uncovered_mass": "137.3084",
+          "mean_uncovered_fraction": "0.9535",
+          "deficit_reduction": "0.012739"
         },
         {
           "rank": "2",
@@ -197,9 +197,9 @@
           "lon_range": "-48 to -46",
           "country": "BR",
           "occurrence_records": "6",
-          "uncovered_mass": "5.6936",
-          "mean_uncovered_fraction": "0.9489",
-          "deficit_reduction": "0.012549"
+          "uncovered_mass": "5.6961",
+          "mean_uncovered_fraction": "0.9493",
+          "deficit_reduction": "0.012687"
         },
         {
           "rank": "3",
@@ -209,45 +209,45 @@
           "lon_range": "34 to 36",
           "country": "KE",
           "occurrence_records": "7",
-          "uncovered_mass": "6.6471",
-          "mean_uncovered_fraction": "0.9496",
-          "deficit_reduction": "0.012458"
+          "uncovered_mass": "6.6446",
+          "mean_uncovered_fraction": "0.9492",
+          "deficit_reduction": "0.012506"
         },
         {
           "rank": "4",
-          "lat_bin": "-20",
-          "lon_bin": "-56",
-          "lat_range": "-20 to -18",
-          "lon_range": "-56 to -54",
-          "country": "BR",
-          "occurrence_records": "1",
-          "uncovered_mass": "0.9488",
-          "mean_uncovered_fraction": "0.9488",
-          "deficit_reduction": "0.012439"
-        },
-        {
-          "rank": "5",
           "lat_bin": "-26",
           "lon_bin": "46",
           "lat_range": "-26 to -24",
           "lon_range": "46 to 48",
           "country": "MG",
           "occurrence_records": "21",
-          "uncovered_mass": "19.3415",
-          "mean_uncovered_fraction": "0.921",
-          "deficit_reduction": "0.01234"
+          "uncovered_mass": "19.572",
+          "mean_uncovered_fraction": "0.932",
+          "deficit_reduction": "0.012454"
+        },
+        {
+          "rank": "5",
+          "lat_bin": "-24",
+          "lon_bin": "-48",
+          "lat_range": "-24 to -22",
+          "lon_range": "-48 to -46",
+          "country": "BR",
+          "occurrence_records": "7",
+          "uncovered_mass": "6.5025",
+          "mean_uncovered_fraction": "0.9289",
+          "deficit_reduction": "0.012098"
         },
         {
           "rank": "6",
-          "lat_bin": "-20",
-          "lon_bin": "-54",
-          "lat_range": "-20 to -18",
-          "lon_range": "-54 to -52",
-          "country": "BR",
-          "occurrence_records": "2",
-          "uncovered_mass": "1.9057",
-          "mean_uncovered_fraction": "0.9528",
-          "deficit_reduction": "0.012147"
+          "lat_bin": "-18",
+          "lon_bin": "144",
+          "lat_range": "-18 to -16",
+          "lon_range": "144 to 146",
+          "country": "AU",
+          "occurrence_records": "32",
+          "uncovered_mass": "31.1374",
+          "mean_uncovered_fraction": "0.973",
+          "deficit_reduction": "0.012063"
         }
       ]
     }
