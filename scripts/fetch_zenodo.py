@@ -32,6 +32,13 @@ WANTED = {
 }
 OUT = os.path.join("data", "external")
 
+# The sequence-side raw data, taken from the same frozen deposit so that the
+# reference library this analysis measures is the one the verdicts describe.
+# Matched by extension and filename prefix rather than exact name.
+RAW_OUT = os.path.join("data", "raw")
+RAW_SUFFIXES = (".gb", ".tsv", ".jsonl")
+RAW_PREFIXES = ("ncbi_", "bold_")
+
 
 def record_id(token):
     m = re.search(r"zenodo\.(\d+)", token) or re.fullmatch(r"(\d+)", token.strip())
@@ -47,11 +54,20 @@ def get(url, binary=False):
     return data if binary else json.loads(data.decode("utf-8"))
 
 
-def save(name, blob, found):
-    path = os.path.join(OUT, name)
+def is_raw_sequence(name):
+    base = os.path.basename(name)
+    return (base.endswith(RAW_SUFFIXES)
+            and base.startswith(RAW_PREFIXES)
+            and "query" not in base)
+
+
+def save(name, blob, found, directory=None):
+    directory = directory or OUT
+    os.makedirs(directory, exist_ok=True)
+    path = os.path.join(directory, os.path.basename(name))
     with open(path, "wb") as f:
         f.write(blob)
-    found.add(name)
+    found.add(os.path.basename(name))
     print(f"  wrote {path} ({len(blob)} bytes)")
 
 
@@ -67,23 +83,38 @@ def main():
     print(f"Zenodo record {rid}: {title}")
     print(f"  DOI {doi}  version {version or 'unversioned'}")
 
-    found = set()
+    found, raw_found = set(), set()
     for entry in meta.get("files", []):
         name = entry.get("key", "")
         link = (entry.get("links") or {}).get("self")
         if not link:
             continue
-        if name in WANTED:
+        if os.path.basename(name) in WANTED:
             save(name, get(link, binary=True), found)
+            continue
+        if is_raw_sequence(name):
+            save(name, get(link, binary=True), raw_found, RAW_OUT)
             continue
         if name.lower().endswith(".zip"):
             print(f"  opening {name}")
             blob = get(link, binary=True)
             with zipfile.ZipFile(io.BytesIO(blob)) as z:
                 for member in z.namelist():
+                    if member.endswith("/"):
+                        continue
                     base = os.path.basename(member)
                     if base in WANTED and base not in found:
                         save(base, z.read(member), found)
+                    elif is_raw_sequence(member) and base not in raw_found:
+                        save(base, z.read(member), raw_found, RAW_OUT)
+
+    if raw_found:
+        print(f"{len(raw_found)} sequence file(s) in {RAW_OUT}/: "
+              f"{', '.join(sorted(raw_found))}")
+    else:
+        print(f"No GenBank or BOLD files in the deposit. climate_extract.py will "
+              f"find no sequence records unless you put them in {RAW_OUT}/ "
+              f"yourself.")
 
     missing = WANTED - found
     with open(os.path.join(OUT, "zenodo_source.txt"), "w") as f:

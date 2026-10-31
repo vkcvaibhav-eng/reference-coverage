@@ -1,0 +1,131 @@
+name: refresh-data
+
+# Rebuilds every input from its citable source and re-runs the analysis.
+# Run it from the Actions tab. Needs three repository secrets:
+#   GBIF_USER, GBIF_PASSWORD, GBIF_EMAIL
+#
+# Optional repository variable KOPPEN_URL: a direct link to a Köppen-Geiger
+# classification raster. Left unset, the Köppen column is skipped.
+
+on:
+  workflow_dispatch:
+    inputs:
+      resolution:
+        description: "WorldClim resolution"
+        type: choice
+        options: ["10m", "5m", "2.5m"]
+        default: "10m"
+      commit:
+        description: "Commit the regenerated data and results"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Identification verdicts and sequence data from Zenodo
+        run: python scripts/fetch_zenodo.py
+
+      - name: GBIF occurrence downloads
+        env:
+          GBIF_USER: ${{ secrets.GBIF_USER }}
+          GBIF_PASSWORD: ${{ secrets.GBIF_PASSWORD }}
+          GBIF_EMAIL: ${{ secrets.GBIF_EMAIL }}
+        run: |
+          python scripts/fetch_gbif.py "Tetranychus urticae" gbif_tetranychus_urticae --download
+          python scripts/fetch_gbif.py "Tetranychus" gbif_tetranychus_genus --download
+          python scripts/fetch_gbif.py "Oligonychus" gbif_oligonychus_genus --download
+
+      - name: Preserve the download DOIs
+        # data/raw is not versioned, so the citable DOIs are copied where they
+        # will survive into the commit.
+        run: |
+          mkdir -p data/derived/gbif_downloads
+          cp data/raw/*_download.txt data/derived/gbif_downloads/ 2>/dev/null || true
+          cp data/raw/*_query.txt data/derived/gbif_downloads/ 2>/dev/null || true
+          cat data/derived/gbif_downloads/*_download.txt || echo "no DOI files found"
+
+      - name: Clean coordinates
+        run: python scripts/clean_coords.py
+
+      - name: Use the cleaned occurrence files
+        # climate_extract.py globs gbif_*.csv, which would pick up both the raw
+        # and the cleaned file. Keep only the cleaned ones.
+        run: |
+          cd data/raw
+          for f in gbif_*_clean.csv; do
+            [ -e "$f" ] || continue
+            mv "${f%_clean.csv}.csv" "${f%_clean.csv}.raw.bak"
+            mv "$f" "${f%_clean.csv}.csv"
+          done
+          ls -la
+
+      - name: Fetch the Köppen raster
+        if: vars.KOPPEN_URL != ''
+        run: curl -sSL "${{ vars.KOPPEN_URL }}" -o koppen.tif
+
+      - name: Extract climate
+        run: |
+          if [ -f koppen.tif ]; then
+            python scripts/climate_extract.py "${{ inputs.resolution }}" --koppen koppen.tif
+          else
+            python scripts/climate_extract.py "${{ inputs.resolution }}"
+          fi
+
+      - name: Coverage deficit
+        run: python scripts/deficit.py --sensitivity
+
+      - name: Hold-out validation
+        run: |
+          PYTHONPATH=scripts python scripts/holdout.py --sweep
+          PYTHONPATH=scripts python scripts/holdout.py 2015
+
+      - name: Tests
+        run: PYTHONPATH=scripts python -m pytest tests/ -q
+
+      - name: Summary
+        run: |
+          {
+            echo '## Coverage deficit'
+            echo '```'
+            cat results/deficit/deficit_summary.txt
+            echo '```'
+            echo '## Hold-out'
+            echo '```'
+            cat results/holdout/holdout_summary.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Commit
+        if: inputs.commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A data/derived results
+          if git diff --staged --quiet; then
+            echo "nothing changed"
+          else
+            git commit -m "Refresh data and results from citable sources
+
+          WorldClim ${{ inputs.resolution }}; GBIF via the download API with a
+          citable DOI; verdicts from 10.5281/zenodo.23808136.
+
+          Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            git push
+          fi
