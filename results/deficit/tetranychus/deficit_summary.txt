@@ -3,17 +3,21 @@ genus filter             Tetranychus
 records used             10889 (occurrence 9915, sequence 974)
 moved to occurrence      94 COI-3P, 1 CYTB, 1 18S
 verdicts matched         688/974 (286 took the default weight of 0.25)
-mean reliability weight  0.416
+mean verifiability       0.416
 effective sequences      405.6 of 974 records
-coverage threshold       5 reliable sequences per neighbourhood
+coverage threshold       5 verifiable sequences per neighbourhood
+shared-cluster weight    derived as 1/k from the anchored species per cluster (1700 records)
 PCA variance explained   PC1 47.4%, PC2 24.4%
+
+label accuracy (context) 0.912 of 1412 checkable labels stood (124 contradicted)
 
 deficit index, naive     0.218
 deficit index, weighted  0.282
 inflation of the gap     +0.064 (+29.2% relative)
-bounds on the weighted index from unverified records:
-  0.223 if they are trusted in full
-  0.305 if they are discarded
+bounds:
+  0.223 unverified records trusted in full
+  0.305 unverified records discarded
+  0.220 FLOOR: every weight set to the chance the label is merely correct
 
 occurrence records in climate space with <10% effective coverage: 745/9915 (7.5%)
 geographic cells (2 degrees) holding occurrences: 655
@@ -22,6 +26,7 @@ weight sensitivity:
   naive                effective sequences   974.0  deficit index 0.218
   default              effective sequences   405.6  deficit index 0.282
   unverified_trusted   effective sequences   620.0  deficit index 0.223
+  label_accuracy       effective sequences   746.7  deficit index 0.220
   strict               effective sequences   201.8  deficit index 0.323
   lenient              effective sequences   611.0  deficit index 0.258
   anchored_only        effective sequences   132.0  deficit index 0.378

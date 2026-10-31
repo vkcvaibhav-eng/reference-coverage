@@ -167,3 +167,40 @@ def test_tables_without_a_marker_column_keep_every_sequence_record():
     assert len(seq) == 2
     assert len(occ) == 1
     assert moved == {}
+
+
+from deficit import FALLBACK_SHARED, SHARED_CLUSTER, label_accuracy
+
+
+def test_shared_cluster_weight_is_one_over_k():
+    """A label that fits k anchored species equally is worth 1/k, not a guess."""
+    rows = [{"record_id": "two"}, {"record_id": "three"}, {"record_id": "four"}]
+    verdicts = {r["record_id"]: SHARED_CLUSTER for r in rows}
+    counts = {"two": 2, "three": 3, "four": 4}
+    w, _ = weights_for(rows, verdicts, WEIGHTS, 0.25, counts)
+    assert w[0] == pytest.approx(0.5)
+    assert w[1] == pytest.approx(1 / 3)
+    assert w[2] == pytest.approx(0.25)
+
+
+def test_shared_cluster_falls_back_without_a_count():
+    rows = [{"record_id": "unknown"}]
+    w, _ = weights_for(rows, {"unknown": SHARED_CLUSTER}, WEIGHTS, 0.25, {})
+    assert w[0] == FALLBACK_SHARED
+
+
+def test_label_accuracy_uses_only_checkable_records():
+    verdicts = {
+        "a": "AGREES", "b": "AGREES", "c": SHARED_CLUSTER,
+        "d": "DISAGREES", "e": "NO_ANCHOR", "f": "UNNAMED_SUGGESTED",
+    }
+    accuracy, checkable, wrong = label_accuracy(verdicts)
+    assert checkable == 4          # NO_ANCHOR and UNNAMED are not checkable
+    assert wrong == 1
+    assert accuracy == pytest.approx(0.75)
+
+
+def test_label_accuracy_is_none_without_checkable_records():
+    accuracy, checkable, wrong = label_accuracy({"a": "NO_ANCHOR"})
+    assert accuracy is None
+    assert checkable == 0

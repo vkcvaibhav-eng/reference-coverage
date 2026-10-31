@@ -2,6 +2,7 @@ scheme,mean_weight,effective_records,deficit_index
 naive,1.0,974.0,0.2184
 default,0.4164,405.6,0.2822
 unverified_trusted,0.6366,620.0,0.2227
+label_accuracy,0.7667,746.7,0.2199
 strict,0.2071,201.8,0.3227
 lenient,0.6273,611.0,0.258
 anchored_only,0.1355,132.0,0.3775

@@ -1,11 +1,19 @@
-"""Reliability-weighted coverage deficit of a DNA barcode reference library.
+"""Verifiable coverage of a DNA barcode reference library, in climate space.
 
 Compares where a taxon is recorded (occurrence records) against where the
-reference library actually holds trustworthy sequences, in climate space, and
-ranks the geographic cells where one new reference specimen would add most.
+library holds reference sequences whose species label can be *verified* against
+a morphologically identified specimen, and ranks the geographic cells where one
+new reference specimen would add most.
+
+The quantity measured is verifiable coverage, not accuracy. A record whose label
+cannot be checked may well be correct — across this anchor table unchecked
+labels are right about nine times in ten — but a user of the library has no way
+to tell which, so unverifiable records cannot carry the weight of a reference.
+The claim is that usable coverage is far smaller than the record count implies,
+and it needs no assumption that the labels are wrong.
 
 Usage:
-    python deficit.py [climate_table.csv] [--sensitivity]
+    python deficit.py [climate_table.csv] [--sensitivity] [--genus NAME]
 
 Defaults to the newest data/derived/climate_*.csv. Identification verdicts are
 read from data/external/record_anchor_check.csv when present; records with no
@@ -38,15 +46,22 @@ OCCURRENCE_SOURCES = {"GBIF"}
 # them to COI.
 BARCODE_MARKERS = {"COI-5P", "COI", ""}
 
+# A weight of None is derived from the data rather than chosen: a record whose
+# cluster holds k anchored species can be assigned to any one of them, so its
+# label is worth 1/k. Every other value is a stated position on what an
+# unverifiable record is worth as a reference, not an estimate of how often such
+# labels are right.
+SHARED_CLUSTER = "AGREES_SHARED_CLUSTER"
 WEIGHTS = {
     "AGREES": 1.00,
-    "AGREES_SHARED_CLUSTER": 0.50,
+    SHARED_CLUSTER: None,      # derived as 1/k
     "NO_ANCHOR": 0.25,
     "UNNAMED_SUGGESTED": 0.25,
     "UNNAMED_SEVERAL_POSSIBLE": 0.10,
     "DISAGREES": 0.00,
 }
 DEFAULT_WEIGHT = 0.25
+FALLBACK_SHARED = 0.50     # used when the anchored-species count is unavailable
 
 # Alternative schemes for --sensitivity, as (weight map, weight for records with
 # no verdict). "naive" is the published convention: every record counts fully,
@@ -56,6 +71,10 @@ SCHEMES = {
     "naive": ({k: 1.0 for k in WEIGHTS}, 1.00),
     "default": (WEIGHTS, DEFAULT_WEIGHT),
     "unverified_trusted": (WEIGHTS, 1.00),
+    # The floor: every weight set to the chance the label is simply correct,
+    # unverifiable records included at the observed base rate. If the claim
+    # survives here it survives the strongest objection to it.
+    "label_accuracy": (None, None),
     "strict": ({"AGREES": 1.0, "AGREES_SHARED_CLUSTER": 0.25, "NO_ANCHOR": 0.0,
                 "UNNAMED_SUGGESTED": 0.0, "UNNAMED_SEVERAL_POSSIBLE": 0.0,
                 "DISAGREES": 0.0}, 0.0),
@@ -150,6 +169,43 @@ def assign_roles(rows):
             reclassified)
 
 
+def anchor_table():
+    """Rows of the preceding study's per-record anchor check, if present."""
+    for path in (os.path.join("data", "external", "record_anchor_check.csv"),
+                 os.path.join("data", "derived", "record_anchor_check.csv")):
+        if os.path.exists(path):
+            with open(path) as f:
+                return list(csv.DictReader(f))
+    return []
+
+
+def load_anchor_counts():
+    """record_id -> number of anchored species sharing that record's cluster."""
+    counts = {}
+    for r in anchor_table():
+        names = [x.strip() for x in (r.get("anchored_species") or "").split(";")]
+        names = [x for x in names if x]
+        if names:
+            counts[r["record_id"]] = len(names)
+    return counts
+
+
+def label_accuracy(verdicts):
+    """Observed share of checkable labels that an anchor did not contradict.
+
+    Estimated only from records whose cluster contains an anchored specimen,
+    which are the better-studied part of the library, so applying it to
+    unanchored records is an optimistic extrapolation rather than a neutral one.
+    Reported as the floor of the claim, never as the working weight.
+    """
+    checkable = [v for v in verdicts.values()
+                 if v in ("AGREES", SHARED_CLUSTER, "DISAGREES")]
+    if not checkable:
+        return None, 0, 0
+    wrong = sum(1 for v in checkable if v == "DISAGREES")
+    return 1.0 - wrong / len(checkable), len(checkable), wrong
+
+
 def load_verdicts():
     for path in (os.path.join("data", "external", "record_anchor_check.csv"),
                  os.path.join("data", "derived", "record_anchor_check.csv")):
@@ -229,17 +285,28 @@ def bilinear(surface, gx, gy, x, y):
     return surface[iy, ix]
 
 
-def weights_for(seq_rows, verdicts, scheme=None, unmatched_weight=DEFAULT_WEIGHT):
-    """Reliability weight per sequence record, and how many had no verdict."""
+def weights_for(seq_rows, verdicts, scheme=None, unmatched_weight=DEFAULT_WEIGHT,
+                anchor_counts=None):
+    """Verifiability weight per sequence record, and how many had no verdict.
+
+    A scheme value of None is derived rather than chosen: for a record whose
+    cluster holds k anchored species the weight is 1/k.
+    """
     scheme = WEIGHTS if scheme is None else scheme
+    anchor_counts = anchor_counts or {}
     out, unmatched = [], 0
     for r in seq_rows:
-        verdict = verdicts.get(r.get("record_id", ""))
+        rid = r.get("record_id", "")
+        verdict = verdicts.get(rid)
         if verdict is None:
             unmatched += 1
             out.append(unmatched_weight)
-        else:
-            out.append(scheme.get(verdict, unmatched_weight))
+            continue
+        value = scheme.get(verdict, unmatched_weight)
+        if value is None:
+            k = anchor_counts.get(rid)
+            value = (1.0 / k) if k else FALLBACK_SHARED
+        out.append(value)
     return np.array(out, dtype=float), unmatched
 
 
@@ -306,6 +373,8 @@ def main():
                  f"{len(occ_rows)} and {len(seq_rows)} from {path}")
 
     verdicts = load_verdicts()
+    anchor_counts = load_anchor_counts()
+    accuracy, checkable, contradicted = label_accuracy(verdicts)
     scores, var, _ = pca2([r["_bio"] for r in rows])
     occ_mask = np.array([r["_role"] == "occurrence" for r in rows])
     seq_mask = np.array([r["_role"] == "sequence" for r in rows])
@@ -318,7 +387,7 @@ def main():
 
     occ_density, _ = density_on_grid(occ_scores, gx, gy)
     naive_density, naive_area = density_on_grid(seq_scores, gx, gy)
-    w, unmatched = weights_for(seq_rows, verdicts)
+    w, unmatched = weights_for(seq_rows, verdicts, anchor_counts=anchor_counts)
     weighted_density, wtd_area = density_on_grid(seq_scores, gx, gy, weights=w)
 
     naive_cov, naive_def, naive_index = coverage_and_deficit(
@@ -326,14 +395,24 @@ def main():
     wtd_cov, wtd_def, wtd_index = coverage_and_deficit(
         occ_density, weighted_density, w.sum(), wtd_area)
 
-    # Bounds on the weighted index from the records that carry no verdict:
-    # giving them full credit, and giving them none.
+    # Bounds on the index. The first two vary only what an unverified record is
+    # worth. The third is the floor: every weight replaced by the chance the
+    # label is simply correct, which is the strongest objection to the method.
     bounds = {}
     for label, unmatched_w in (("unverified trusted", 1.0),
                                ("unverified discarded", 0.0)):
-        bw, _ = weights_for(seq_rows, verdicts, WEIGHTS, unmatched_w)
+        bw, _ = weights_for(seq_rows, verdicts, WEIGHTS, unmatched_w,
+                            anchor_counts)
         bd, ba = density_on_grid(seq_scores, gx, gy, weights=bw)
         bounds[label] = coverage_and_deficit(occ_density, bd, bw.sum(), ba)[2]
+    if accuracy is not None:
+        acc_scheme = {"AGREES": 1.0, SHARED_CLUSTER: None, "NO_ANCHOR": accuracy,
+                      "UNNAMED_SUGGESTED": 0.0, "UNNAMED_SEVERAL_POSSIBLE": 0.0,
+                      "DISAGREES": 0.0}
+        bw, _ = weights_for(seq_rows, verdicts, acc_scheme, accuracy, anchor_counts)
+        bd, ba = density_on_grid(seq_scores, gx, gy, weights=bw)
+        bounds["labels merely correct"] = coverage_and_deficit(
+            occ_density, bd, bw.sum(), ba)[2]
 
     # Per-occurrence-record uncovered fraction under the weighted surface.
     uncovered = 1.0 - bilinear(wtd_cov, gx, gy, occ_scores[:, 0], occ_scores[:, 1])
@@ -374,7 +453,12 @@ def main():
     sens_rows, thresh_rows = [], []
     if sensitivity:
         for name, (scheme, unmatched_w) in SCHEMES.items():
-            sw, _ = weights_for(seq_rows, verdicts, scheme, unmatched_w)
+            if scheme is None:            # the label_accuracy floor
+                if accuracy is None:
+                    continue
+                scheme, unmatched_w = acc_scheme, accuracy
+            sw, _ = weights_for(seq_rows, verdicts, scheme, unmatched_w,
+                                anchor_counts)
             d, area = density_on_grid(seq_scores, gx, gy, weights=sw)
             _, _, idx = coverage_and_deficit(occ_density, d, sw.sum(), area)
             sens_rows.append({"scheme": name,
@@ -415,19 +499,28 @@ def main():
         f"moved to occurrence      {reclass_note}",
         f"verdicts matched         {len(seq_rows) - unmatched}/{len(seq_rows)}"
         f" ({unmatched} took the default weight of {DEFAULT_WEIGHT})",
-        f"mean reliability weight  {w.mean():.3f}",
+        f"mean verifiability       {w.mean():.3f}",
         f"effective sequences      {w.sum():.1f} of {len(seq_rows)} records",
-        f"coverage threshold       {MIN_RELIABLE:g} reliable sequences per neighbourhood",
+        f"coverage threshold       {MIN_RELIABLE:g} verifiable sequences per neighbourhood",
+        f"shared-cluster weight    derived as 1/k from the anchored species per "
+        f"cluster ({len(anchor_counts)} records)",
         f"PCA variance explained   PC1 {var[0]:.1%}, PC2 {var[1]:.1%}",
+        "",
+        f"label accuracy (context) {accuracy:.3f} of {checkable} checkable "
+        f"labels stood ({contradicted} contradicted)" if accuracy is not None else "",
         "",
         f"deficit index, naive     {naive_index:.3f}",
         f"deficit index, weighted  {wtd_index:.3f}",
         f"inflation of the gap     {wtd_index - naive_index:+.3f}"
         + (f" ({(wtd_index / naive_index - 1) * 100:+.1f}% relative)"
            if naive_index else ""),
-        f"bounds on the weighted index from unverified records:",
-        f"  {bounds['unverified trusted']:.3f} if they are trusted in full",
-        f"  {bounds['unverified discarded']:.3f} if they are discarded",
+        "bounds:",
+        f"  {bounds['unverified trusted']:.3f} unverified records trusted in full",
+        f"  {bounds['unverified discarded']:.3f} unverified records discarded",
+    ] + ([
+        f"  {bounds['labels merely correct']:.3f} FLOOR: every weight set to the "
+        f"chance the label is merely correct",
+    ] if "labels merely correct" in bounds else []) + [
         "",
         f"occurrence records in climate space with <10% effective coverage: "
         f"{int((uncovered > 0.9).sum())}/{len(uncovered)}"

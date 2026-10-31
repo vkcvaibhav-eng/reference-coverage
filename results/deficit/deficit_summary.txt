@@ -1,25 +1,46 @@
-climate table            /tmp/climate_oligonychus.csv
-records used             3199 (occurrence 2878, sequence 321)
-moved to occurrence      none
-verdicts matched         0/321 (321 took the default weight of 0.25)
-mean reliability weight  0.250
-effective sequences      80.2 of 321 records
-coverage threshold       5 reliable sequences per neighbourhood
-PCA variance explained   PC1 45.0%, PC2 25.4%
+climate table            data/derived/climate_worldclim_10m.csv
+genus filter             none (genera pooled)
+records used             15478 (occurrence 13605, sequence 1873)
+moved to occurrence      94 COI-3P, 2 18S, 1 CYTB
+verdicts matched         1068/1873 (805 took the default weight of 0.25)
+mean verifiability       0.323
+effective sequences      604.2 of 1873 records
+coverage threshold       5 verifiable sequences per neighbourhood
+shared-cluster weight    derived as 1/k from the anchored species per cluster (1700 records)
+PCA variance explained   PC1 47.0%, PC2 24.2%
 
-deficit index, naive     0.789
-deficit index, weighted  0.870
-inflation of the gap     +0.081 (+10.2% relative)
-bounds on the weighted index from unverified records:
-  0.789 if they are trusted in full
-  1.000 if they are discarded
+label accuracy (context) 0.912 of 1412 checkable labels stood (124 contradicted)
 
-occurrence records in climate space with <10% effective coverage: 2206/2878 (76.7%)
-geographic cells (2 degrees) holding occurrences: 235
+deficit index, naive     0.181
+deficit index, weighted  0.268
+inflation of the gap     +0.087 (+48.0% relative)
+bounds:
+  0.189 unverified records trusted in full
+  0.295 unverified records discarded
+  0.183 FLOOR: every weight set to the chance the label is merely correct
+
+occurrence records in climate space with <10% effective coverage: 978/13605 (7.2%)
+geographic cells (2 degrees) holding occurrences: 743
+
+weight sensitivity:
+  naive                effective sequences  1873.0  deficit index 0.181
+  default              effective sequences   604.2  deficit index 0.268
+  unverified_trusted   effective sequences  1207.9  deficit index 0.189
+  label_accuracy       effective sequences  1344.2  deficit index 0.183
+  strict               effective sequences   201.8  deficit index 0.311
+  lenient              effective sequences  1017.0  deficit index 0.232
+  anchored_only        effective sequences   132.0  deficit index 0.376
+
+coverage-threshold sensitivity (naive -> weighted):
+      1  0.065 -> 0.102  (+56.5% inflation)
+      3  0.132 -> 0.203  (+54.0% inflation)
+      5  0.181 -> 0.268  (+48.0% inflation)
+     10  0.266 -> 0.378  (+42.5% inflation)
+     20  0.368 -> 0.515  (+39.8% inflation)
 
 top 5 sampling priorities:
-  1. unknown (-20, 46)  uncovered mass 140.5619
-  2. unknown (-34, 150)  uncovered mass 112.7935
-  3. unknown (-24, 42)  uncovered mass 94.5414
-  4. unknown (-14, 130)  uncovered mass 84.0396
-  5. unknown (-22, 54)  uncovered mass 71.837
+  1. unknown (-14, 130)  uncovered mass 256.4215
+  2. unknown (-22, 54)  uncovered mass 250.7837
+  3. unknown (-34, 150)  uncovered mass 107.2963
+  4. unknown (36, 136)  uncovered mass 64.1413
+  5. unknown (-6, 54)  uncovered mass 56.7917

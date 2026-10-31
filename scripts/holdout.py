@@ -30,7 +30,7 @@ import sys
 
 import numpy as np
 
-from deficit import (GRID, WEIGHTS, assign_roles, bilinear,
+from deficit import (GRID, WEIGHTS, assign_roles, bilinear, load_anchor_counts,
                      coverage_and_deficit, density_on_grid, load_records,
                      load_verdicts, newest_climate_table, pca2, weights_for)
 
@@ -60,7 +60,7 @@ def prepare(path, genus=None):
     return rows, dated, position, var, gx, gy
 
 
-def run_one(cutoff, dated, position, gx, gy, verdicts):
+def run_one(cutoff, dated, position, gx, gy, verdicts, anchor_counts=None):
     """One hold-out test. Returns a result dict, or a dict with 'skipped'."""
     pc = lambda subset: np.array([position[id(r)] for r in subset])
     early = [r for r in dated if r["_year"] <= cutoff]
@@ -74,7 +74,7 @@ def run_one(cutoff, dated, position, gx, gy, verdicts):
                 "test_sequence": len(late_seq)}
 
     occ_density, _ = density_on_grid(pc(early_occ), gx, gy)
-    w, unmatched = weights_for(early_seq, verdicts)
+    w, unmatched = weights_for(early_seq, verdicts, anchor_counts=anchor_counts)
     seq_density, area = density_on_grid(pc(early_seq), gx, gy, weights=w)
     coverage, _, train_index = coverage_and_deficit(occ_density, seq_density,
                                                     w.sum(), area)
@@ -159,11 +159,12 @@ def main():
 
     _, dated, position, var, gx, gy = prepare(path, genus)
     verdicts = load_verdicts()
+    anchor_counts = load_anchor_counts()
 
     if sweep:
         out = []
         for cutoff in SWEEP:
-            res = run_one(cutoff, dated, position, gx, gy, verdicts)
+            res = run_one(cutoff, dated, position, gx, gy, verdicts, anchor_counts)
             if res.get("skipped"):
                 print(f"{cutoff}  skipped: {res['skipped']}")
                 out.append({"cutoff": cutoff, "train_sequence": res["train_sequence"],
@@ -210,7 +211,7 @@ def main():
         return
 
     cutoff = int(args[0]) if args else 2015
-    res = run_one(cutoff, dated, position, gx, gy, verdicts)
+    res = run_one(cutoff, dated, position, gx, gy, verdicts, anchor_counts)
     if res.get("skipped"):
         sys.exit(f"Cutoff {cutoff}: {res['skipped']} (training occurrence "
                  f"{res['train_occurrence']}, training sequence "
