@@ -127,7 +127,7 @@ Weight schemes spanned a counted scheme in which every specimen contributes full
 
 ### 2.9. Software and data availability
 
-The workflow is implemented in Python 3.12 using NumPy, SciPy, rasterio and Biopython, with 30 automated tests. The repository provides the analysis code, automated tests, figure-generation scripts and machine-readable numerical summaries; Table 1 and the figures are emitted by those scripts, and the numerical statements in the text were cross-checked against the summaries. `fetch_gbif.py`, `deficit.py` and `holdout.py` take a taxon name as an argument; the remaining scripts operate on whatever the preceding steps produced. Applying the framework to another taxon requires GBIF and sequence inputs for that taxon and an equivalent per-record verification, not changes to the code.
+The workflow is implemented in Python 3.12 using NumPy, SciPy, rasterio and Biopython, with 30 automated tests, and is archived at doi:10.5281/zenodo.23841628. The deposit provides the analysis code, automated tests, figure-generation scripts and machine-readable numerical summaries; Table 1 and the figures are emitted by those scripts, and the numerical statements in the text were cross-checked against the summaries. `fetch_gbif.py`, `deficit.py` and `holdout.py` take a taxon name as an argument; the remaining scripts operate on whatever the preceding steps produced. Applying the framework to another taxon requires GBIF and sequence inputs for that taxon and an equivalent per-record verification, not changes to the code.
 
 ## 3. Results
 
@@ -238,7 +238,7 @@ Public COI reference libraries are routinely assessed by counting records, which
 
 **CRediT author statement.** **V. K. Chaudhari:** Conceptualization, Methodology, Software, Formal analysis, Data curation, Writing – original draft, Writing – review & editing, Visualization. **Abhishek Shukla:** Conceptualization, Validation, Writing – review & editing, Supervision.
 
-**Data availability.** The analysis code, derived data tables and all results are available at github.com/vkcvaibhav-eng/reference-coverage and will be archived with a citable DOI at acceptance; the release citation will be inserted at that stage. Occurrence data are the GBIF downloads doi:10.15468/dl.xxfcra, doi:10.15468/dl.aejp4w and doi:10.15468/dl.5mckab. Identification verdicts, crosswalks and sequence data are from doi:10.5281/zenodo.23808136.
+**Data availability.** The analysis code, derived data tables and all results are archived at doi:10.5281/zenodo.23841628 (release v1.0.0; all versions doi:10.5281/zenodo.23841627), with development at github.com/vkcvaibhav-eng/reference-coverage. Occurrence data are the GBIF downloads doi:10.15468/dl.xxfcra, doi:10.15468/dl.aejp4w and doi:10.15468/dl.5mckab. Identification verdicts, crosswalks and sequence data are from doi:10.5281/zenodo.23808136.
 
 ## Declaration of generative AI in the writing process
 

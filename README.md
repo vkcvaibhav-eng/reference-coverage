@@ -1,5 +1,7 @@
 # reference-coverage
 
+[![DOI](https://zenodo.org/badge/1440433294.svg)](https://doi.org/10.5281/zenodo.23841627)
+
 A workflow for measuring how much of the geographic and climatic range in which
 a taxon is recorded is backed by *verifiable* reference sequences, and for
 ranking the places where a new reference specimen would add the most.
