@@ -72,6 +72,14 @@ Records with no verdict take `DEFAULT_WEIGHT`. Rather than rest on that one
 number, every run also reports the index with those records trusted in full and
 with them discarded, which bounds the effect of the assumption.
 
+## One genus at a time
+
+A sequence of one genus supplies no reference coverage for another, so pooling
+genera understates the gap. `deficit.py --genus Tetranychus` and
+`holdout.py --sweep --genus Tetranychus` restrict both sides and write to a
+subfolder of `results/`. Run each genus separately and report them separately;
+the pooled run is kept only as a comparison.
+
 ## Hold-out validation
 
 `holdout.py <year>` trains on records up to a cutoff and tests against what came
@@ -88,8 +96,8 @@ python scripts/fetch_gbif.py "Tetranychus urticae" gbif_tetranychus_urticae
 python scripts/clean_coords.py
 python scripts/climate_extract.py 10m
 python scripts/fetch_zenodo.py
-python scripts/deficit.py --sensitivity
-python scripts/holdout.py --sweep
+python scripts/deficit.py --sensitivity --genus Tetranychus
+python scripts/holdout.py --sweep --genus Tetranychus
 ```
 
 ## Licence

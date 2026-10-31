@@ -1,0 +1,14 @@
+climate table              data/derived/climate_worldclim_10m.csv
+genus filter               Tetranychus
+cutoff year                2015
+training set               occurrence 6753, sequence 519
+test set                   354 sequence records after 2015
+verdicts matched (train)   338/519
+PCA variance explained     PC1 49.8%, PC2 24.3%
+training deficit index     0.523
+
+mean uncovered fraction at post-2015 sequence locations  0.366
+null 'occurrence'  0.414  [0.373, 0.452]  one-sided p 0.9905
+null 'sequencing'  0.095  [0.079, 0.112]  one-sided p 0.0005
+
+reading: post-cutoff sequencing did no better than sampling the recorded range at random

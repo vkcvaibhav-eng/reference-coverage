@@ -1,0 +1,41 @@
+climate table            data/derived/climate_worldclim_10m.csv
+genus filter             Oligonychus
+records used             3199 (occurrence 2878, sequence 321)
+moved to occurrence      none
+verdicts matched         0/321 (321 took the default weight of 0.25)
+mean reliability weight  0.250
+effective sequences      80.2 of 321 records
+coverage threshold       5 reliable sequences per neighbourhood
+PCA variance explained   PC1 45.0%, PC2 25.4%
+
+deficit index, naive     0.789
+deficit index, weighted  0.870
+inflation of the gap     +0.081 (+10.2% relative)
+bounds on the weighted index from unverified records:
+  0.789 if they are trusted in full
+  1.000 if they are discarded
+
+occurrence records in climate space with <10% effective coverage: 2206/2878 (76.7%)
+geographic cells (2 degrees) holding occurrences: 235
+
+weight sensitivity:
+  naive                effective sequences   321.0  deficit index 0.789
+  default              effective sequences    80.2  deficit index 0.870
+  unverified_trusted   effective sequences   321.0  deficit index 0.789
+  strict               effective sequences     0.0  deficit index 1.000
+  lenient              effective sequences   160.5  deficit index 0.833
+  anchored_only        effective sequences     0.0  deficit index 1.000
+
+coverage-threshold sensitivity (naive -> weighted):
+      1  0.651 -> 0.773  (+18.8% inflation)
+      3  0.751 -> 0.843  (+12.2% inflation)
+      5  0.789 -> 0.870  (+10.2% inflation)
+     10  0.833 -> 0.904  (+8.6% inflation)
+     20  0.870 -> 0.937  (+7.7% inflation)
+
+top 5 sampling priorities:
+  1. unknown (-20, 46)  uncovered mass 140.5619
+  2. unknown (-34, 150)  uncovered mass 112.7935
+  3. unknown (-24, 42)  uncovered mass 94.5414
+  4. unknown (-14, 130)  uncovered mass 84.0396
+  5. unknown (-22, 54)  uncovered mass 71.837

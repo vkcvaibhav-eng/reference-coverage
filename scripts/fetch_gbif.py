@@ -159,6 +159,9 @@ def via_download(key, name, taxon):
         for rec in reader:
             row = {k: rec.get(k, "") for k in FIELDS}
             row["issues"] = rec.get("issue", rec.get("issues", ""))
+            # SIMPLE_CSV carries countryCode but not country.
+            if not row.get("country"):
+                row["country"] = rec.get("countryCode", "")
             w.writerow(row)
             total += 1
 

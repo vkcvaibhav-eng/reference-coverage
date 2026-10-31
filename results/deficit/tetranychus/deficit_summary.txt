@@ -1,0 +1,41 @@
+climate table            data/derived/climate_worldclim_10m.csv
+genus filter             Tetranychus
+records used             10889 (occurrence 9915, sequence 974)
+moved to occurrence      94 COI-3P, 1 CYTB, 1 18S
+verdicts matched         688/974 (286 took the default weight of 0.25)
+mean reliability weight  0.416
+effective sequences      405.6 of 974 records
+coverage threshold       5 reliable sequences per neighbourhood
+PCA variance explained   PC1 47.4%, PC2 24.4%
+
+deficit index, naive     0.218
+deficit index, weighted  0.282
+inflation of the gap     +0.064 (+29.2% relative)
+bounds on the weighted index from unverified records:
+  0.223 if they are trusted in full
+  0.305 if they are discarded
+
+occurrence records in climate space with <10% effective coverage: 745/9915 (7.5%)
+geographic cells (2 degrees) holding occurrences: 655
+
+weight sensitivity:
+  naive                effective sequences   974.0  deficit index 0.218
+  default              effective sequences   405.6  deficit index 0.282
+  unverified_trusted   effective sequences   620.0  deficit index 0.223
+  strict               effective sequences   201.8  deficit index 0.323
+  lenient              effective sequences   611.0  deficit index 0.258
+  anchored_only        effective sequences   132.0  deficit index 0.378
+
+coverage-threshold sensitivity (naive -> weighted):
+      1  0.086 -> 0.112  (+30.3% inflation)
+      3  0.164 -> 0.215  (+30.8% inflation)
+      5  0.218 -> 0.282  (+29.2% inflation)
+     10  0.309 -> 0.396  (+28.1% inflation)
+     20  0.420 -> 0.540  (+28.5% inflation)
+
+top 5 sampling priorities:
+  1. unknown (-14, 130)  uncovered mass 195.1262
+  2. unknown (-34, 150)  uncovered mass 174.6416
+  3. unknown (-22, 54)  uncovered mass 115.6918
+  4. unknown (-6, 54)  uncovered mass 64.6924
+  5. unknown (38, 104)  uncovered mass 38.9485

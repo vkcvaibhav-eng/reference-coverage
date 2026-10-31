@@ -89,13 +89,28 @@ def newest_climate_table():
     return paths[-1]
 
 
-def load_records(path):
-    """Climate table rows that carry a full BIO1-BIO19 vector, deduplicated."""
+def genus_of(taxon):
+    """Leading word of a taxon string; empty for BOLD BIN labels and blanks."""
+    t = (taxon or "").strip()
+    if not t or t.startswith("BOLD:"):
+        return ""
+    return t.split()[0]
+
+
+def load_records(path, genus=None):
+    """Climate table rows that carry a full BIO1-BIO19 vector, deduplicated.
+
+    genus restricts both sides to one genus. A sequence of one genus supplies no
+    reference coverage for another, so pooling genera understates the gap; the
+    filter is the correct default for a per-genus result.
+    """
     seen, rows = set(), []
     with open(path) as f:
         for r in csv.DictReader(f):
             key = (r.get("source"), r.get("record_id"))
             if key in seen:
+                continue
+            if genus and genus_of(r.get("taxon")).lower() != genus.lower():
                 continue
             if any(r.get(b) in (None, "") for b in BIO):
                 continue
@@ -276,10 +291,15 @@ def priority_list(occ_rows, occ_scores, uncovered, pc_bandwidth):
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     sensitivity = "--sensitivity" in sys.argv
+    genus = None
+    if "--genus" in sys.argv:
+        genus = sys.argv[sys.argv.index("--genus") + 1]
+        args = [a for a in args if a.lower() != genus.lower()]
     path = args[0] if args else newest_climate_table()
-    os.makedirs(OUTDIR, exist_ok=True)
+    outdir = os.path.join(OUTDIR, genus.lower()) if genus else OUTDIR
+    os.makedirs(outdir, exist_ok=True)
 
-    rows = load_records(path)
+    rows = load_records(path, genus)
     occ_rows, seq_rows, reclassified = assign_roles(rows)
     if not occ_rows or not seq_rows:
         sys.exit(f"Need both occurrence and sequence records; got "
@@ -319,7 +339,7 @@ def main():
     uncovered = 1.0 - bilinear(wtd_cov, gx, gy, occ_scores[:, 0], occ_scores[:, 1])
     bandwidth = float(np.mean([gx[0, 1] - gx[0, 0], gy[1, 0] - gy[0, 0]]) * GRID / 12)
 
-    with open(os.path.join(OUTDIR, "climate_space.csv"), "w", newline="") as f:
+    with open(os.path.join(outdir, "climate_space.csv"), "w", newline="") as f:
         wr = csv.writer(f)
         wr.writerow(["pc1", "pc2", "occurrence_density", "coverage_naive",
                      "coverage_weighted", "deficit_naive", "deficit_weighted"])
@@ -335,7 +355,7 @@ def main():
         key = (int(np.floor(row["_lat"] / CELL) * CELL),
                int(np.floor(row["_lon"] / CELL) * CELL))
         geo.setdefault(key, []).append(float(u))
-    with open(os.path.join(OUTDIR, "geographic_deficit.csv"), "w", newline="") as f:
+    with open(os.path.join(outdir, "geographic_deficit.csv"), "w", newline="") as f:
         wr = csv.writer(f)
         wr.writerow(["lat_bin", "lon_bin", "occurrence_records",
                      "mean_uncovered_fraction"])
@@ -343,7 +363,7 @@ def main():
             wr.writerow([la, lo_, len(vals), round(float(np.mean(vals)), 4)])
 
     picks = priority_list(occ_rows, occ_scores, uncovered, bandwidth)
-    with open(os.path.join(OUTDIR, "priority_list.csv"), "w", newline="") as f:
+    with open(os.path.join(outdir, "priority_list.csv"), "w", newline="") as f:
         wr = csv.DictWriter(f, fieldnames=["rank", "lat_bin", "lon_bin", "country",
                                            "occurrence_records", "uncovered_mass",
                                            "mean_uncovered_fraction"])
@@ -361,7 +381,7 @@ def main():
                               "mean_weight": round(float(sw.mean()), 4),
                               "effective_records": round(float(sw.sum()), 1),
                               "deficit_index": round(idx, 4)})
-        with open(os.path.join(OUTDIR, "weight_sensitivity.csv"), "w", newline="") as f:
+        with open(os.path.join(outdir, "weight_sensitivity.csv"), "w", newline="") as f:
             wr = csv.DictWriter(f, fieldnames=["scheme", "mean_weight",
                                                "effective_records", "deficit_index"])
             wr.writeheader()
@@ -377,7 +397,7 @@ def main():
                                 "deficit_weighted": round(w_idx, 4),
                                 "relative_inflation":
                                     round(w_idx / n_idx - 1, 4) if n_idx else ""})
-        with open(os.path.join(OUTDIR, "threshold_sensitivity.csv"), "w",
+        with open(os.path.join(outdir, "threshold_sensitivity.csv"), "w",
                   newline="") as f:
             wr = csv.DictWriter(f, fieldnames=["min_reliable", "deficit_naive",
                                                "deficit_weighted",
@@ -390,6 +410,7 @@ def main():
                     if reclassified else "none")
     lines = [
         f"climate table            {path}",
+        f"genus filter             {genus or 'none (genera pooled)'}",
         f"records used             {len(rows)} (occurrence {len(occ_rows)}, sequence {len(seq_rows)})",
         f"moved to occurrence      {reclass_note}",
         f"verdicts matched         {len(seq_rows) - unmatched}/{len(seq_rows)}"
@@ -433,7 +454,7 @@ def main():
                   for i, p in enumerate(picks[:5], 1)]
 
     text = "\n".join(l for l in lines if l is not None)
-    with open(os.path.join(OUTDIR, "deficit_summary.txt"), "w") as f:
+    with open(os.path.join(outdir, "deficit_summary.txt"), "w") as f:
         f.write(text + "\n")
     print(text)
 

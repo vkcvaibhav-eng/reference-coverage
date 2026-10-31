@@ -89,12 +89,17 @@ jobs:
           fi
 
       - name: Coverage deficit
-        run: python scripts/deficit.py --sensitivity
+        run: |
+          python scripts/deficit.py --sensitivity
+          python scripts/deficit.py --sensitivity --genus Tetranychus
+          python scripts/deficit.py --sensitivity --genus Oligonychus
 
       - name: Hold-out validation
         run: |
           PYTHONPATH=scripts python scripts/holdout.py --sweep
-          PYTHONPATH=scripts python scripts/holdout.py 2015
+          PYTHONPATH=scripts python scripts/holdout.py --sweep --genus Tetranychus
+          PYTHONPATH=scripts python scripts/holdout.py --sweep --genus Oligonychus
+          PYTHONPATH=scripts python scripts/holdout.py 2015 --genus Tetranychus
 
       - name: Tests
         run: PYTHONPATH=scripts python -m pytest tests/ -q
@@ -104,11 +109,11 @@ jobs:
           {
             echo '## Coverage deficit'
             echo '```'
-            cat results/deficit/deficit_summary.txt
+            cat results/deficit/tetranychus/deficit_summary.txt
             echo '```'
             echo '## Hold-out'
             echo '```'
-            cat results/holdout/holdout_summary.txt
+            cat results/holdout/tetranychus/holdout_summary.txt
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 

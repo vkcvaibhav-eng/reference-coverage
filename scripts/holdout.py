@@ -41,9 +41,9 @@ SWEEP = (2006, 2008, 2010, 2012, 2014, 2015, 2016, 2018, 2020)
 MIN_TRAIN_SEQ = 150   # below this the training library is too thin to be a fair test
 
 
-def prepare(path):
+def prepare(path, genus=None):
     """Dated records with roles assigned, and their shared PCA climate space."""
-    rows = load_records(path)
+    rows = load_records(path, genus)
     assign_roles(rows)
     dated = [r for r in rows if (r.get("year") or "").isdigit()]
     if not dated:
@@ -105,7 +105,7 @@ def run_one(cutoff, dated, position, gx, gy, verdicts):
             "late_seq": late_seq, "observed_per_record": observed}
 
 
-def report(res, var, path):
+def report(res, var, path, genus=None):
     nulls, pvals = res["nulls"], res["pvals"]
     if all(p < 0.05 for p in pvals.values()):
         verdict = "post-cutoff sequencing targeted the gaps, against both nulls"
@@ -118,6 +118,7 @@ def report(res, var, path):
                    "recorded range at random")
     lines = [
         f"climate table              {path}",
+        f"genus filter               {genus or 'none (genera pooled)'}",
         f"cutoff year                {res['cutoff']}",
         f"training set               occurrence {res['train_occurrence']}, "
         f"sequence {res['train_sequence']}",
@@ -145,13 +146,18 @@ def report(res, var, path):
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     sweep = "--sweep" in sys.argv
+    genus = None
+    if "--genus" in sys.argv:
+        genus = sys.argv[sys.argv.index("--genus") + 1]
+        args = [a for a in args if a.lower() != genus.lower()]
     if sweep:
         path = args[0] if args else newest_climate_table()
     else:
         path = args[1] if len(args) > 1 else newest_climate_table()
-    os.makedirs(OUTDIR, exist_ok=True)
+    outdir = os.path.join(OUTDIR, genus.lower()) if genus else OUTDIR
+    os.makedirs(outdir, exist_ok=True)
 
-    _, dated, position, var, gx, gy = prepare(path)
+    _, dated, position, var, gx, gy = prepare(path, genus)
     verdicts = load_verdicts()
 
     if sweep:
@@ -187,7 +193,7 @@ def main():
                   f"p {res['pvals']['occurrence']:.4f}/"
                   f"{res['pvals']['sequencing']:.4f}"
                   f"{'  (thin)' if res['thin_training'] else ''}")
-        with open(os.path.join(OUTDIR, "cutoff_sweep.csv"), "w", newline="") as f:
+        with open(os.path.join(outdir, "cutoff_sweep.csv"), "w", newline="") as f:
             wr = csv.DictWriter(f, fieldnames=list(out[0].keys()))
             wr.writeheader()
             wr.writerows(out)
@@ -200,7 +206,7 @@ def main():
                   f" of them")
             print(f"ratio to the occurrence null: {min(ratios):.2f} to "
                   f"{max(ratios):.2f}")
-        print(f"\nSaved {os.path.join(OUTDIR, 'cutoff_sweep.csv')}")
+        print(f"\nSaved {os.path.join(outdir, 'cutoff_sweep.csv')}")
         return
 
     cutoff = int(args[0]) if args else 2015
@@ -210,7 +216,7 @@ def main():
                  f"{res['train_occurrence']}, training sequence "
                  f"{res['train_sequence']}, test sequence {res['test_sequence']})")
 
-    with open(os.path.join(OUTDIR, "holdout_records.csv"), "w", newline="") as f:
+    with open(os.path.join(outdir, "holdout_records.csv"), "w", newline="") as f:
         wr = csv.writer(f)
         wr.writerow(["source", "record_id", "taxon", "country", "year",
                      "lat", "lon", "uncovered_fraction"])
@@ -220,8 +226,8 @@ def main():
                          round(r["_lat"], 4), round(r["_lon"], 4),
                          round(float(u), 4)])
 
-    text = report(res, var, path)
-    with open(os.path.join(OUTDIR, "holdout_summary.txt"), "w") as f:
+    text = report(res, var, path, genus)
+    with open(os.path.join(outdir, "holdout_summary.txt"), "w") as f:
         f.write(text + "\n")
     print(text)
 

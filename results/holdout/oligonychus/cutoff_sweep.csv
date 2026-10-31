@@ -1,0 +1,10 @@
+cutoff,train_sequence,test_sequence,observed,null_occurrence,p_occurrence,null_sequencing,p_sequencing,ratio_to_occurrence_null,note
+2006,0,41,,,,,,,too few records either side
+2008,0,41,,,,,,,too few records either side
+2010,0,41,,,,,,,too few records either side
+2012,10,31,,,,,,,too few records either side
+2014,22,19,0.9316,0.9979,1.0,0.8401,0.0005,0.934,thin training library
+2015,23,18,0.9435,0.9978,1.0,0.8294,0.0005,0.946,thin training library
+2016,26,15,0.93,0.9951,1.0,0.8255,0.0005,0.935,thin training library
+2018,26,15,0.93,0.9952,1.0,0.8255,0.0005,0.935,thin training library
+2020,27,14,0.9094,0.9928,1.0,0.8054,0.0005,0.916,thin training library
