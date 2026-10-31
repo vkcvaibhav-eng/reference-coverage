@@ -1,0 +1,5 @@
+Reference-library coverage is weighted by whether each label can be verified
+Verifiable coverage of Tetranychus climate space is 29% smaller than counts imply
+The gap widens at every coverage threshold tested, from k = 1 to k = 20
+A temporal hold-out shows sequencing lagging the recorded range at six cutoffs
+Workflow takes any taxon name and returns a ranked sampling-priority list

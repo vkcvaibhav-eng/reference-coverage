@@ -22,7 +22,7 @@ V. K. Chaudhari^a,\*^, Abhishek Shukla^b^
 
 ## Abstract
 
-Gap analyses of DNA barcode reference libraries count records. Counting assumes that the species label attached to each record is correct, an assumption that fails for taxa where morphological identification is hard and public databases are known to carry misidentifications. We describe a framework that measures instead the *verifiable* coverage of a reference library across the climate space in which a taxon is recorded, and that ranks the localities where one additional reference specimen would add most. Each sequence record carries a weight for whether its label can be confirmed against a morphologically identified anchor specimen; the weight for a record whose cluster holds k anchored species is derived as 1/k rather than chosen. Coverage at a point in climate space is the probability that at least k verifiable sequences lie within one kernel bandwidth of it, and the deficit index is the share of recorded occurrence lying outside that coverage. We applied the framework to spider mites, using 9,915 georeferenced *Tetranychus* occurrence records from GBIF and 974 georeferenced COI records from GenBank and BOLD, with WorldClim 2.1 bioclimatic variables at each point. Weighting reduced 974 sequence records to 405.6 effective sequences and raised the deficit index from 0.218 to 0.282, a relative widening of 29.2%. The widening held between 28.1% and 30.8% across coverage thresholds spanning k = 1 to k = 20, and the weighted index exceeded the unweighted index even when every unverifiable record was credited in full (0.223) and when every weight was replaced by the observed probability that a label is merely correct (0.220). A temporal hold-out trained on records up to a cutoff year placed post-cutoff sequencing below a recorded-range null at all six cutoffs with an adequate training library, with observed-to-null ratios of 0.69 to 0.97: sequencing effort has not been directed at the climatic gaps. *Oligonychus*, for which no anchor verdicts were available, returned an unweighted deficit index of 0.789. The result is not a claim that public labels are wrong — unchecked labels in this dataset stood in 91.2% of checkable cases — but that a library user cannot tell which are right, so unverifiable records cannot carry the weight of a reference. All code, derived data and results are archived and citable.
+Gap analyses of DNA barcode reference libraries count records, which presumes that the species label on each record is correct. That presumption fails for taxa where morphological identification is hard and public databases carry known misidentifications. We describe a framework that measures instead the *verifiable* coverage of a reference library across the climate space in which a taxon is recorded, and ranks the localities where one further reference specimen would add most. Each sequence record carries a weight for whether its label can be confirmed against a morphologically identified anchor specimen; a record whose cluster holds k anchored species is weighted 1/k, derived rather than chosen. The deficit index is the share of recorded occurrence lying outside that coverage. Applied to spider mites, using 9,915 georeferenced *Tetranychus* occurrence records and 974 COI records with WorldClim 2.1 variables at each point, weighting reduced 974 records to 405.6 effective sequences and raised the deficit index from 0.218 to 0.282, a relative widening of 29.2%. The widening held between 28.1% and 30.8% across thresholds from k = 1 to k = 20, and persisted when every unverifiable record was credited in full. A temporal hold-out placed post-cutoff sequencing below a recorded-range null at all six cutoffs with an adequate training library: sequencing has not been directed at the gaps. The quantity measured is verifiability, not accuracy — unchecked labels stood in 91.2% of checkable cases, but a library user cannot tell which.
 
 **Keywords:** DNA barcoding; COI; reference library; coverage gap analysis; Tetranychidae; biodiversity informatics
 
@@ -106,10 +106,6 @@ Three families of sensitivity analysis were run. Weight schemes spanned a naive 
 ### 2.9. Software and data availability
 
 The workflow is implemented in Python 3.12 using NumPy, SciPy, rasterio and Biopython, with 30 automated tests. Code, derived data tables and all results are archived at Zenodo and the repository is public at github.com/vkcvaibhav-eng/reference-coverage. Every script takes a taxon name as an argument; reproducing the analysis for another taxon requires no change to the code.
-
-### 2.10. Use of generative AI
-
-The analysis code, figures and a first draft of this manuscript were produced with the assistance of a large language model (Claude, Anthropic). We designed the study, selected and verified the sources, checked the analysis and its outputs, and revised the text. We are responsible for the content.
 
 ## 3. Results
 
@@ -226,6 +222,10 @@ Public COI reference libraries are routinely assessed by counting records, which
 **Data availability.** Code, derived data and results are archived at Zenodo and available at github.com/vkcvaibhav-eng/reference-coverage. Occurrence data are the GBIF downloads doi:10.15468/dl.xxfcra, doi:10.15468/dl.aejp4w and doi:10.15468/dl.5mckab. Identification verdicts are from doi:10.5281/zenodo.23808136.
 
 ---
+
+## Declaration of generative AI in the writing process
+
+The analysis code, figures and a first draft of this manuscript were produced with the assistance of a large language model (Claude, Anthropic). We designed the study, selected and verified the sources, checked the analysis and its outputs, and revised the text. We are responsible for the content.
 
 ## References
 
