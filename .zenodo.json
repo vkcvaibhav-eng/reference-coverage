@@ -1,0 +1,34 @@
+{
+  "title": "reference-coverage: verifiable coverage of DNA barcode reference libraries in climate space",
+  "description": "A workflow for measuring how much of the geographic and climatic range in which a taxon is recorded is backed by reference sequences whose species label can be verified against a morphologically identified specimen, and for ranking the places where a new reference specimen would add the most. Spider mites (Acari: Tetranychidae) are the demonstration taxon; every script takes a taxon name as an argument.",
+  "upload_type": "software",
+  "license": "mit",
+  "access_right": "open",
+  "creators": [
+    {
+      "name": "Chaudhari, V. K.",
+      "affiliation": "AINP on Agricultural Acarology, Department of Entomology, N. M. College of Agriculture, Navsari Agricultural University, Navsari 396450, Gujarat, India"
+    }
+  ],
+  "keywords": [
+    "DNA barcoding",
+    "COI",
+    "reference library",
+    "Tetranychidae",
+    "Tetranychus",
+    "Oligonychus",
+    "Acari",
+    "GBIF",
+    "WorldClim",
+    "biodiversity informatics",
+    "sampling gaps"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "10.5281/zenodo.23808136",
+      "relation": "isDerivedFrom",
+      "resource_type": "software",
+      "scheme": "doi"
+    }
+  ]
+}
