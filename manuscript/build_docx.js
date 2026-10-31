@@ -3,7 +3,7 @@ const path = require("path");
 const {
   Document, Packer, Paragraph, TextRun, ImageRun, HeadingLevel, AlignmentType,
   Table, TableRow, TableCell, WidthType, ShadingType, BorderStyle,
-  LineNumberRestartFormat, convertInchesToTwip,
+  LineNumberRestartFormat, convertInchesToTwip, Footer, PageNumber,
 } = require("docx");
 
 const SRC = process.argv[2] || "manuscript.md";
@@ -118,7 +118,7 @@ while (i < md.length) {
   if (/^# /.test(line)) {
     children.push(new Paragraph({
       children: runs(line.slice(2), { bold: true, size: 30 }),
-      spacing: { after: 240, line: 360 },
+      spacing: { after: 240, line: 480 },
       alignment: AlignmentType.LEFT,
     }));
     i++; continue;
@@ -140,7 +140,7 @@ while (i < md.length) {
   if (/^\*\*(Fig\.|Table)/.test(line)) {
     children.push(new Paragraph({
       children: runs(line, { size: 20 }),
-      spacing: { line: 240, after: 200 },
+      spacing: { line: 480, after: 200 },
       keepNext: /^\*\*Table/.test(line),
     }));
     i++; continue;
@@ -149,10 +149,10 @@ while (i < md.length) {
   // reference entry: hanging indent
   const inRefs = children.some(c => c instanceof Paragraph) &&
     md.slice(0, i).some(l => /^## References/.test(l));
-  if (inRefs && /^[A-ZÇÁÉÍÓÚÀÈÌÒÙŠŽČĆĐ]/.test(line) && /\d{4}\./.test(line)) {
+  if (inRefs && /^[a-zA-ZÇÁÉÍÓÚÀÈÌÒÙŠŽČĆĐ]/.test(line) && /\((?:19|20)\d{2}[a-z]?\)/.test(line)) {
     children.push(new Paragraph({
       children: runs(line, { size: 20 }),
-      spacing: { line: 300, after: 120 },
+      spacing: { line: 480, after: 120 },
       indent: { left: convertInchesToTwip(0.4), hanging: convertInchesToTwip(0.4) },
     }));
     i++; continue;
@@ -174,6 +174,14 @@ const doc = new Document({
     properties: {
       page: { size: { width: PAGE_W, height: PAGE_H }, margin: { top: MARGIN, bottom: MARGIN, left: MARGIN, right: MARGIN } },
       lineNumbers: { countBy: 1, restart: LineNumberRestartFormat.CONTINUOUS, distance: 360 },
+    },
+    footers: {
+      default: new Footer({
+        children: [new Paragraph({
+          alignment: AlignmentType.CENTER,
+          children: [new TextRun({ children: [PageNumber.CURRENT], font: FONT, size: 20 })],
+        })],
+      }),
     },
     children,
   }],

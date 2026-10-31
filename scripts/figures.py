@@ -23,20 +23,23 @@ plt.rcParams.update({
     # the text unsearchable.
     "pdf.fonttype": 42,
     "ps.fonttype": 42,
-    "font.family": "serif",
-    "font.size": 8,
-    "axes.labelsize": 8,
-    "axes.titlesize": 8,
-    "xtick.labelsize": 7,
-    "ytick.labelsize": 7,
-    "legend.fontsize": 7,
+    # Springer asks for Helvetica or Arial at 8-12 pt; Liberation Sans is
+    # the metrically compatible substitute available here
+    "font.family": "sans-serif",
+    "font.sans-serif": ["Liberation Sans", "Arial", "Helvetica", "DejaVu Sans"],
+    "font.size": 9,
+    "axes.labelsize": 9,
+    "axes.titlesize": 9,
+    "xtick.labelsize": 9,
+    "ytick.labelsize": 9,
+    "legend.fontsize": 9,
     "axes.linewidth": 0.6,
     "xtick.major.width": 0.6,
     "ytick.major.width": 0.6,
     "savefig.bbox": "tight",
 })
 CM = 1 / 2.54
-SINGLE, DOUBLE = 8.5 * CM, 17.5 * CM
+SINGLE, DOUBLE = 8.4 * CM, 17.4 * CM   # Springer column widths
 
 
 def read(path):
@@ -46,7 +49,7 @@ def read(path):
 
 def save(fig, outdir, name):
     os.makedirs(outdir, exist_ok=True)
-    for ext in ("pdf", "png"):
+    for ext in ("pdf", "eps", "png"):
         fig.savefig(os.path.join(outdir, f"{name}.{ext}"), dpi=600)
     plt.close(fig)
     print(f"  {name}")
@@ -84,7 +87,7 @@ def fig_climate_space(dd, outdir):
         ax.tick_params(labelleft=False)
     for ax, lab in zip(axes, "abc"):
         ax.text(0.02, 0.97, f"({lab})", transform=ax.transAxes, va="top",
-                fontsize=8, fontweight="bold", color="black",
+                fontsize=9, fontweight="bold", color="black",
                 bbox=dict(fc="white", ec="none", alpha=0.75, pad=1.2))
     save(fig, outdir, "Fig1_climate_space")
 
@@ -109,7 +112,7 @@ def fig_map(dd, outdir):
                s=70, facecolors="none", edgecolors="#1f78b4", linewidths=1.0)
     for i, p in enumerate(top[:5], 1):
         ax.annotate(str(i), (float(p["lon_bin"]) + 1, float(p["lat_bin"]) + 1),
-                    textcoords="offset points", xytext=(6, 4), fontsize=7,
+                    textcoords="offset points", xytext=(6, 4), fontsize=9,
                     color="#1f78b4", fontweight="bold")
     ax.axhline(0, color="0.8", lw=0.4)
     ax.set_xlim(-187, 187)      # margin so a priority label at 180° is not clipped
@@ -119,7 +122,7 @@ def fig_map(dd, outdir):
     ax.set_xticks(range(-180, 181, 60))
     ax.set_yticks(range(-60, 81, 30))
     cb = fig.colorbar(sc, ax=ax, fraction=0.025, pad=0.02)
-    cb.set_label("Mean uncovered fraction", fontsize=7)
+    cb.set_label("Mean uncovered fraction", fontsize=9)
     cb.ax.tick_params(labelsize=6, width=0.5)
     cb.outline.set_linewidth(0.5)
     ax.legend(handles=[Line2D([], [], marker="o", ls="none", mfc="none",
@@ -171,7 +174,7 @@ def fig_sensitivity(dd, outdir):
     a1.set_xlabel("Coverage deficit index")
     for yi, (v, e) in enumerate(zip(idx, eff)):
         a1.text(v + 0.006, yi, f"{v:.3f}  (n={one_dp(e)})", va="center",
-                fontsize=7)
+                fontsize=9)
     a1.set_xlim(0, max(idx) * 1.55)
 
     k = [float(r["min_reliable"]) for r in ts]
@@ -184,7 +187,7 @@ def fig_sensitivity(dd, outdir):
     for xi, a, b in zip(k, dn, dw):
         a2.annotate(f"+{(b / a - 1) * 100:.0f}%", (xi, b),
                     textcoords="offset points", xytext=(0, 5),
-                    ha="center", fontsize=7, color="#2b5d8a")
+                    ha="center", fontsize=9, color="#2b5d8a")
     a2.set_xscale("log")
     a2.set_xlim(min(k) * 0.82, max(k) * 1.22)   # room for the end annotations
     a2.set_xticks(k)
@@ -196,7 +199,7 @@ def fig_sensitivity(dd, outdir):
 
     for ax, lab in ((a1, "a"), (a2, "b")):
         ax.text(-0.12, 1.08, f"({lab})", transform=ax.transAxes, va="top",
-                fontsize=8, fontweight="bold")
+                fontsize=9, fontweight="bold")
     save(fig, outdir, "Fig3_sensitivity")
 
 
@@ -211,8 +214,8 @@ def fig_holdout(hd, outdir, min_train=150):
     ntr = np.array([int(r["train_sequence"]) for r in rows])
 
     fig, (a1, a2) = plt.subplots(1, 2, figsize=(DOUBLE, DOUBLE / 2.7),
-                                 gridspec_kw={"width_ratios": [1.2, 1]})
-    fig.subplots_adjust(wspace=0.32)
+                                 gridspec_kw={"width_ratios": [1.05, 1]})
+    fig.subplots_adjust(wspace=0.3)
 
     a1.plot(yr, n_occ, "^--", color="#b2182b", ms=4, lw=1.0,
             label="Null: recorded range")
@@ -225,12 +228,12 @@ def fig_holdout(hd, outdir, min_train=150):
     if thin.any():
         a1.axvspan(yr.min() - 0.6, yr[thin].max() + 0.6, color="0.9", zorder=0)
         a1.text(yr[thin].mean(), 0.02, f"training library\n< {min_train} sequences",
-                ha="center", fontsize=7, color="0.35")
+                ha="center", fontsize=9, color="0.35")
     a1.set_xticks(yr)
     a1.set_xticklabels([str(v) for v in yr], rotation=45, ha="right")
     a1.set_xlabel("Cutoff year")
     a1.set_ylabel("Mean uncovered fraction")
-    a1.set_ylim(0, 1.2)
+    a1.set_ylim(0, 1.3)
     a1.set_yticks(np.arange(0, 1.01, 0.2))
     a1.legend(frameon=False, loc="upper right")
 
@@ -245,9 +248,9 @@ def fig_holdout(hd, outdir, min_train=150):
     a2.set_ylabel("Observed / null (recorded range)")
     a2.set_ylim(0, max(1.35, ratio.max() * 1.12))
     a2.text(0.5, 0.93, "later-collected records in less-covered climate",
-            transform=a2.transAxes, ha="center", fontsize=7, color="0.35")
+            transform=a2.transAxes, ha="center", fontsize=9, color="0.35")
     a2.text(0.5, 0.06, "later-collected records in better-covered climate",
-            transform=a2.transAxes, ha="center", fontsize=7, color="0.35")
+            transform=a2.transAxes, ha="center", fontsize=9, color="0.35")
     # consecutive cutoff years sit close together, so drop every second
     # label of a tight run onto a lower row to keep the counts readable
     prev_x, low = None, False
@@ -255,12 +258,12 @@ def fig_holdout(hd, outdir, min_train=150):
         low = False if prev_x is None or x - prev_x > 1.5 else not low
         a2.annotate(f"{n}", (x, y_), textcoords="offset points",
                     xytext=(0, -18 if low else -11), ha="center",
-                    fontsize=7, color="0.45")
+                    fontsize=9, color="0.45")
         prev_x = x
 
     for ax, lab in ((a1, "a"), (a2, "b")):
         ax.text(-0.13, 1.08, f"({lab})", transform=ax.transAxes, va="top",
-                fontsize=8, fontweight="bold")
+                fontsize=9, fontweight="bold")
     save(fig, outdir, "Fig4_holdout")
 
 
