@@ -1,5 +1,5 @@
-Reference-library coverage is weighted by whether each label can be verified
-Verifiable coverage of Tetranychus climate space is 29% smaller than counts imply
-The gap widens at every coverage threshold tested, from k = 1 to k = 20
-A temporal hold-out shows sequencing lagging the recorded range at six cutoffs
-Workflow takes any taxon name and returns a ranked sampling-priority list
+Library coverage is weighted by whether each species label can be verified
+Verifiability raises the Tetranychus coverage deficit from 0.258 to 0.327
+One specimen's exact effect on the deficit index ranks candidate localities
+Specimens held under two identifiers inflate counts: 974 rows are 728 mites
+Later-collected specimens sit in better covered climate than the record at large

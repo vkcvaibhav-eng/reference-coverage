@@ -98,6 +98,7 @@ while (i < md.length) {
       width: { size: tw, type: WidthType.DXA },
       rows: rows.map((r, ri) => new TableRow({
         tableHeader: ri === 0,
+        cantSplit: true,
         children: Array.from({ length: ncol }, (_, ci) => new TableCell({
           width: { size: colw[ci], type: WidthType.DXA },
           shading: ri === 0 ? { type: ShadingType.CLEAR, fill: "F2F2F2" } : undefined,
