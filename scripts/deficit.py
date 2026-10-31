@@ -30,6 +30,14 @@ BIO = [f"bio{i}" for i in range(1, 20)]
 SEQUENCE_SOURCES = {"BOLD", "GenBank"}
 OCCURRENCE_SOURCES = {"GBIF"}
 
+# Only the barcode region of COI can supply reference coverage for a COI
+# library. A georeferenced specimen record whose sequence is COI-3P, another
+# gene, or absent is an occurrence record, not reference coverage, and is
+# counted on the occurrence side. Records from a table with no marker column
+# are left on the sequence side, since the preceding study's query restricted
+# them to COI.
+BARCODE_MARKERS = {"COI-5P", "COI", ""}
+
 WEIGHTS = {
     "AGREES": 1.00,
     "AGREES_SHARED_CLUSTER": 0.50,
@@ -100,6 +108,31 @@ def load_records(path):
             seen.add(key)
             rows.append(r)
     return rows
+
+
+def assign_roles(rows):
+    """Split records into occurrence and reference-sequence roles.
+
+    Sets r["_role"] on every row. A sequence-source record whose marker is not
+    the barcode region is moved to the occurrence side: it locates the taxon but
+    adds nothing to a COI reference library. Returns the two lists and a count
+    of what was moved, by marker.
+    """
+    reclassified = {}
+    for r in rows:
+        if (r.get("source") in SEQUENCE_SOURCES
+                and "marker" in r
+                and r.get("marker", "") not in BARCODE_MARKERS):
+            label = r.get("marker") or "(no sequence)"
+            reclassified[label] = reclassified.get(label, 0) + 1
+            r["_role"] = "occurrence"
+        elif r.get("source") in SEQUENCE_SOURCES:
+            r["_role"] = "sequence"
+        else:
+            r["_role"] = "occurrence"
+    return ([r for r in rows if r["_role"] == "occurrence"],
+            [r for r in rows if r["_role"] == "sequence"],
+            reclassified)
 
 
 def load_verdicts():
@@ -247,16 +280,15 @@ def main():
     os.makedirs(OUTDIR, exist_ok=True)
 
     rows = load_records(path)
-    occ_rows = [r for r in rows if r.get("source") in OCCURRENCE_SOURCES]
-    seq_rows = [r for r in rows if r.get("source") in SEQUENCE_SOURCES]
+    occ_rows, seq_rows, reclassified = assign_roles(rows)
     if not occ_rows or not seq_rows:
         sys.exit(f"Need both occurrence and sequence records; got "
                  f"{len(occ_rows)} and {len(seq_rows)} from {path}")
 
     verdicts = load_verdicts()
     scores, var, _ = pca2([r["_bio"] for r in rows])
-    occ_mask = np.array([r.get("source") in OCCURRENCE_SOURCES for r in rows])
-    seq_mask = np.array([r.get("source") in SEQUENCE_SOURCES for r in rows])
+    occ_mask = np.array([r["_role"] == "occurrence" for r in rows])
+    seq_mask = np.array([r["_role"] == "sequence" for r in rows])
     occ_scores, seq_scores = scores[occ_mask], scores[seq_mask]
 
     pad = 0.05 * (scores.max(axis=0) - scores.min(axis=0))
@@ -273,6 +305,15 @@ def main():
         occ_density, naive_density, len(seq_scores), naive_area)
     wtd_cov, wtd_def, wtd_index = coverage_and_deficit(
         occ_density, weighted_density, w.sum(), wtd_area)
+
+    # Bounds on the weighted index from the records that carry no verdict:
+    # giving them full credit, and giving them none.
+    bounds = {}
+    for label, unmatched_w in (("unverified trusted", 1.0),
+                               ("unverified discarded", 0.0)):
+        bw, _ = weights_for(seq_rows, verdicts, WEIGHTS, unmatched_w)
+        bd, ba = density_on_grid(seq_scores, gx, gy, weights=bw)
+        bounds[label] = coverage_and_deficit(occ_density, bd, bw.sum(), ba)[2]
 
     # Per-occurrence-record uncovered fraction under the weighted surface.
     uncovered = 1.0 - bilinear(wtd_cov, gx, gy, occ_scores[:, 0], occ_scores[:, 1])
@@ -344,9 +385,13 @@ def main():
             wr.writeheader()
             wr.writerows(thresh_rows)
 
+    reclass_note = (", ".join(f"{v} {k}" for k, v in
+                              sorted(reclassified.items(), key=lambda kv: -kv[1]))
+                    if reclassified else "none")
     lines = [
         f"climate table            {path}",
         f"records used             {len(rows)} (occurrence {len(occ_rows)}, sequence {len(seq_rows)})",
+        f"moved to occurrence      {reclass_note}",
         f"verdicts matched         {len(seq_rows) - unmatched}/{len(seq_rows)}"
         f" ({unmatched} took the default weight of {DEFAULT_WEIGHT})",
         f"mean reliability weight  {w.mean():.3f}",
@@ -359,6 +404,9 @@ def main():
         f"inflation of the gap     {wtd_index - naive_index:+.3f}"
         + (f" ({(wtd_index / naive_index - 1) * 100:+.1f}% relative)"
            if naive_index else ""),
+        f"bounds on the weighted index from unverified records:",
+        f"  {bounds['unverified trusted']:.3f} if they are trusted in full",
+        f"  {bounds['unverified discarded']:.3f} if they are discarded",
         "",
         f"occurrence records in climate space with <10% effective coverage: "
         f"{int((uncovered > 0.9).sum())}/{len(uncovered)}"

@@ -27,8 +27,12 @@ number in `results/` will change.
 
 | Column group | Source |
 |---|---|
-| `source`, `record_id`, `taxon`, `country`, `host`, `year`, `lat`, `lon` | NCBI GenBank, BOLD, GBIF |
+| `source`, `record_id`, `taxon`, `country`, `host`, `year`, `marker`, `lat`, `lon` | NCBI GenBank, BOLD, GBIF |
 | `bio1`–`bio19` | WorldClim 2.1, 10 arc-minute (Fick & Hijmans 2017) |
+
+`marker` was back-filled from the BOLD `marker_code` and `nuc` columns and from
+GenBank gene and product qualifiers: 1,722 COI-5P, 174 COI-3P, 3 18S, 2 CYTB,
+1 with no sequence.
 
 Sequence-record coordinates derived from country or province centroids were
 excluded at extraction. GBIF coordinates in this version have **not** yet been

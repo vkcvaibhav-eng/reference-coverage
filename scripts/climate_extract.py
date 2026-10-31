@@ -24,7 +24,6 @@ import tempfile
 import urllib.request
 import zipfile
 
-import rasterio
 from Bio import SeqIO
 
 RAW = os.path.join("data", "raw")
@@ -32,12 +31,35 @@ OUT = os.path.join("data", "derived")
 URL = "https://geodata.ucdavis.edu/climate/worldclim/2_1/base/wc2.1_{res}_bio.zip"
 NUM = re.compile(r"-?\d+(?:\.\d+)?")
 YEAR = re.compile(r"(1[89]\d{2}|20\d{2})")
-FIELDS = ["source", "record_id", "taxon", "country", "host", "year", "lat", "lon"]
+FIELDS = ["source", "record_id", "taxon", "country", "host", "year", "marker",
+          "lat", "lon"]
 
 
 def year_from(text):
     m = YEAR.search(str(text or ""))
     return m.group(1) if m else ""
+
+
+def marker_label(text):
+    """Normalise a gene or marker string to a short code.
+
+    Only the barcode region of COI can serve as reference coverage for a COI
+    library, so COI-5P is kept distinct from COI-3P and from other genes.
+    """
+    t = str(text or "").upper().replace("_", "-")
+    if not t:
+        return ""
+    if any(k in t for k in ("COI-3P", "COX1-3P", "COXI-3P")):
+        return "COI-3P"
+    if any(k in t for k in ("CYTB", "CYTOCHROME B", "CYTOCHROME-B")):
+        return "CYTB"
+    if any(k in t for k in ("COI", "COXI", "COX1", "CO1", "CYTOCHROME C OXIDASE",
+                            "CYTOCHROME OXIDASE")):
+        return "COI-5P"
+    for key in ("16S", "18S", "28S", "ITS2", "ITS1", "ITS"):
+        if key in t:
+            return key
+    return t.split()[0][:12]
 
 
 def genbank_points():
@@ -51,11 +73,16 @@ def genbank_points():
             if not m:
                 continue
             q = src.qualifiers
+            genes = {g for f in rec.features if f.type in ("gene", "CDS")
+                     for g in f.qualifiers.get("gene", [])}
+            products = {p for f in rec.features if f.type == "CDS"
+                        for p in f.qualifiers.get("product", [])}
             yield {"source": "GenBank", "record_id": rec.id,
                    "taxon": q.get("organism", [""])[0],
                    "country": q.get("country", q.get("geo_loc_name", [""]))[0],
                    "host": q.get("host", [""])[0],
                    "year": year_from(q.get("collection_date", [""])[0]),
+                   "marker": marker_label(" ".join(genes | products)),
                    "lat": float(m.group(1)) * (1 if m.group(2) == "N" else -1),
                    "lon": float(m.group(3)) * (1 if m.group(4) == "E" else -1)}
 
@@ -86,11 +113,13 @@ def bold_points():
             if len(nums) != 2:
                 continue
             lat, lon = nums
+        sequence = (r.get("nuc") or r.get("nucraw") or "").replace("-", "").strip()
         yield {"source": "BOLD", "record_id": r.get("processid", ""),
                "taxon": r.get("species", ""), "country": r.get("country/ocean", ""),
                "host": r.get("associated_taxa", ""),
                "year": year_from(r.get("collection_date")
                                  or r.get("collection_date_start") or ""),
+               "marker": marker_label(r.get("marker_code")) if sequence else "",
                "lat": float(lat), "lon": float(lon)}
 
 
@@ -107,11 +136,14 @@ def gbif_points():
                        "country": r.get("country", ""),
                        "host": r.get("associatedTaxa", ""),
                        "year": r.get("year") or year_from(r.get("eventDate")),
+                       "marker": "",
                        "lat": float(r["decimalLatitude"]),
                        "lon": float(r["decimalLongitude"])}
 
 
 def sample_raster(path, coords, points, column, digits=3):
+    import rasterio  # imported here so the module loads without the geospatial stack
+
     with rasterio.open(path) as src:
         nodata = src.nodata
         for p, val in zip(points, src.sample(coords)):
@@ -138,6 +170,15 @@ def main():
     with_year = sum(1 for p in points if p["year"])
     print(f"{with_year} of them carry a collection year "
           f"({with_year / len(points):.0%})")
+    markers = {}
+    for p in points:
+        if p["source"] != "GBIF":
+            markers[p["marker"] or "(no sequence)"] = \
+                markers.get(p["marker"] or "(no sequence)", 0) + 1
+    if markers:
+        print("sequence-record markers: "
+              + ", ".join(f"{k} {v}" for k, v in
+                          sorted(markers.items(), key=lambda kv: -kv[1])))
 
     tmp = tempfile.mkdtemp()
     url = URL.format(res=res)

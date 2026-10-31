@@ -40,6 +40,16 @@ holdout.py           build the priority map from pre-2015 records only, then tes
                      it against records deposited afterwards
 ```
 
+## What counts as reference coverage
+
+A georeferenced record contributes to coverage only if it supplies a sequence
+from the barcode region. `deficit.py` reads the `marker` column and moves
+everything else — COI-3P, other genes, records with no sequence — onto the
+occurrence side, where it still marks where the taxon was found. The move is
+reported, by marker, in every run. A climate table with no `marker` column
+keeps all of its sequence records, on the assumption that the query restricted
+them to COI.
+
 ## Reliability weights
 
 `deficit.py` maps each identification verdict to a weight in [0, 1]:
@@ -54,8 +64,21 @@ holdout.py           build the priority map from pre-2015 records only, then tes
 | `DISAGREES` | 0.00 | label contradicted by an anchored specimen |
 
 These values are a judgement, not a measurement. `deficit.py --sensitivity`
-re-runs the whole analysis under alternative schemes and reports how far the
-conclusion moves.
+re-runs the analysis under alternative schemes, and across a range of coverage
+thresholds, and reports how far the conclusion moves. The absolute index
+depends on the threshold; the naive-to-weighted inflation does not.
+
+Records with no verdict take `DEFAULT_WEIGHT`. Rather than rest on that one
+number, every run also reports the index with those records trusted in full and
+with them discarded, which bounds the effect of the assumption.
+
+## Hold-out validation
+
+`holdout.py <year>` trains on records up to a cutoff and tests against what came
+after. `holdout.py --sweep` repeats it across cutoffs from 2006 to 2020, so the
+cutoff is a reported robustness result rather than a choice. Cutoffs whose
+training library falls below `MIN_TRAIN_SEQ` sequences are flagged as thin and
+should be read as indicative only.
 
 ## Reproducing
 
@@ -65,8 +88,8 @@ python scripts/fetch_gbif.py "Tetranychus urticae" gbif_tetranychus_urticae
 python scripts/clean_coords.py
 python scripts/climate_extract.py 10m
 python scripts/fetch_zenodo.py
-python scripts/deficit.py
-python scripts/holdout.py 2015
+python scripts/deficit.py --sensitivity
+python scripts/holdout.py --sweep
 ```
 
 ## Licence

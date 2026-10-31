@@ -1,21 +1,21 @@
 rank,lat_bin,lon_bin,country,occurrence_records,uncovered_mass,mean_uncovered_fraction
-1,-14,130,Australia,142,73.1586,0.5152
-2,-22,54,Réunion,75,67.3323,0.8978
-3,22,120,Chinese Taipei,84,36.9879,0.4403
-4,-34,150,Australia,607,31.7495,0.0523
-5,32,-116,United States of America,22,16.3389,0.7427
-6,38,140,Japan,27,15.7212,0.5823
-7,58,98,Russian Federation,25,12.7605,0.5104
-8,38,104,China,15,10.0871,0.6725
-9,-6,142,Papua New Guinea,9,6.3548,0.7061
-10,-16,128,Australia,75,6.1811,0.0824
-11,36,136,Japan,17,5.68,0.3341
-12,-24,166,New Caledonia,49,2.5502,0.052
-13,36,-122,United States of America,66,1.7921,0.0272
-14,62,-86,Canada,3,1.4086,0.4695
-15,38,34,Türkiye,10,1.0329,0.1033
-16,24,120,Chinese Taipei,12,1.013,0.0844
+1,-14,130,Australia,142,72.0376,0.5073
+2,-22,54,Réunion,75,66.9092,0.8921
+3,22,120,Chinese Taipei,84,36.6976,0.4369
+4,-34,150,Australia,607,30.3662,0.05
+5,32,-116,United States of America,22,16.0593,0.73
+6,38,140,Japan,27,15.3532,0.5686
+7,58,98,Russian Federation,25,12.0581,0.4823
+8,38,104,China,15,10.7643,0.7176
+9,-16,128,Australia,75,6.5888,0.0879
+10,6,-76,Colombia,12,6.5147,0.5429
+11,36,136,Japan,17,5.6243,0.3308
+12,-24,166,New Caledonia,49,2.1259,0.0434
+13,36,-122,United States of America,66,1.7115,0.0259
+14,62,-86,Canada,3,1.3926,0.4642
+15,38,34,Türkiye,10,1.214,0.1214
+16,24,120,Chinese Taipei,12,1.0962,0.0913
 17,12,74,India,1,1.0,1.0
-18,56,-134,United States of America,1,0.9892,0.9892
-19,26,88,India,1,0.6149,0.6149
-20,6,-76,Colombia,12,0.5695,0.0475
+18,56,-134,United States of America,1,0.9911,0.9911
+19,26,88,India,1,0.6057,0.6057
+20,-20,46,Madagascar,42,0.4887,0.0116

@@ -117,3 +117,53 @@ def test_unknown_verdict_falls_back_to_the_unmatched_weight():
     w, unmatched = weights_for(rows, {"a": "SOMETHING_NEW"}, WEIGHTS, 0.25)
     assert w[0] == 0.25
     assert unmatched == 0
+
+
+from climate_extract import marker_label
+from deficit import assign_roles
+
+
+@pytest.mark.parametrize("text,expected", [
+    ("COI-5P", "COI-5P"),
+    ("COI-3P", "COI-3P"),
+    ("coi-5p", "COI-5P"),
+    ("cytochrome c oxidase subunit I", "COI-5P"),
+    ("cytochrome oxidase subunit 1", "COI-5P"),
+    ("COXI", "COI-5P"),
+    ("COX1", "COI-5P"),
+    ("cytochrome b", "CYTB"),
+    ("CYTB", "CYTB"),
+    ("18S-5P", "18S"),
+    ("ITS2", "ITS2"),
+    ("", ""),
+    (None, ""),
+])
+def test_marker_label(text, expected):
+    assert marker_label(text) == expected
+
+
+def test_cytochrome_b_is_not_read_as_coi():
+    """CYTB must be matched before the cytochrome-oxidase patterns."""
+    assert marker_label("cytochrome b") != "COI-5P"
+
+
+def test_non_barcode_sequences_become_occurrences():
+    rows = [
+        {"source": "GenBank", "marker": "COI-5P"},
+        {"source": "BOLD", "marker": "COI-3P"},
+        {"source": "BOLD", "marker": "CYTB"},
+        {"source": "BOLD", "marker": ""},
+        {"source": "GBIF", "marker": ""},
+    ]
+    occ, seq, moved = assign_roles(rows)
+    assert len(seq) == 2                      # the COI-5P record and the blank-marker one
+    assert len(occ) == 3                      # GBIF, plus COI-3P and CYTB moved across
+    assert moved == {"COI-3P": 1, "CYTB": 1}
+
+
+def test_tables_without_a_marker_column_keep_every_sequence_record():
+    rows = [{"source": "GenBank"}, {"source": "BOLD"}, {"source": "GBIF"}]
+    occ, seq, moved = assign_roles(rows)
+    assert len(seq) == 2
+    assert len(occ) == 1
+    assert moved == {}
