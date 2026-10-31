@@ -1,4 +1,4 @@
-# Verifiable coverage of public COI reference libraries in climate space: a framework applied to spider mites (Acari: Tetranychidae)
+# Evidence-weighted climatic coverage of public COI reference libraries: a framework applied to spider mites
 
 V. K. Chaudhari^a,\*^, Abhishek Shukla^b^
 
@@ -42,7 +42,7 @@ A second, independent problem attends counting. Reference sequences are not draw
 
 Quantifying occurrence in environmental rather than geographic space is established practice. Broennimann et al. (2012) set out a framework applying kernel smoothers to occurrence densities in gridded environmental space, deliberately so that the result does not depend on sampling effort or on an arbitrary resolution, and used it to compare niches between taxa. We adopt that geometry. What we add is not the environmental-space representation but the evidential weighting within it, and the resolution of records to specimens that must precede it.
 
-The framework therefore asks, for a given taxon, how much of its recorded climate space is covered by reference sequences whose label can be verified against a morphologically identified specimen, and where one further specimen would most reduce the shortfall. The quantity is deliberately verifiability rather than accuracy: we take no position on how often public labels are right, and measure how much of the library a user could check.
+The framework therefore asks, for a given taxon, how much of its recorded climate space is covered by reference sequences whose label can be verified against a morphologically identified specimen, and where one further specimen would most reduce the shortfall. Coverage is weighted by that evidence rather than counted. The quantity is deliberately verifiability rather than accuracy: we take no position on how often public labels are right, and measure how much of the library a user could check.
 
 ## 2. Materials and methods
 

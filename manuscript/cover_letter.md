@@ -10,7 +10,7 @@ Ecological Informatics
 
 Dear Editor,
 
-We submit for your consideration the manuscript "Verifiable coverage of public COI reference libraries in climate space: a framework applied to spider mites (Acari: Tetranychidae)".
+We submit for your consideration the manuscript "Evidence-weighted climatic coverage of public COI reference libraries: a framework applied to spider mites".
 
 Published gap analyses of DNA barcode reference libraries measure coverage by counting records bearing a species name. The count treats two things as given: that each record is a distinct specimen, and that its label is correct. Neither held in our data. GenBank and BOLD index the same reference material under different identifiers, so 974 georeferenced Tetranychus rows resolved to 728 specimens; and the barcode region does not separate several congeners within Tetranychus sensu stricto.
 
