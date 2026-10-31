@@ -537,6 +537,13 @@ def main():
         })
     scored.sort(key=lambda r: -r["deficit_reduction"])
     picks = scored[:N_PRIORITY]
+    if collapse_report.get("conflict_rows"):
+        with open(os.path.join(outdir, "coordinate_conflicts.csv"), "w",
+                  newline="") as f:
+            wr = csv.DictWriter(f, fieldnames=["canonical", "records",
+                                               "coordinates"])
+            wr.writeheader()
+            wr.writerows(collapse_report["conflict_rows"])
     with open(os.path.join(outdir, "priority_list.csv"), "w", newline="") as f:
         wr = csv.DictWriter(f, fieldnames=["rank", "lat_bin", "lon_bin", "lat_range",
                                            "lon_range", "country",

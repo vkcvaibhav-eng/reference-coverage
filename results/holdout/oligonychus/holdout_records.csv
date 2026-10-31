@@ -1,19 +1,18 @@
 source,record_id,taxon,country,year,lat,lon,uncovered_fraction
-GenBank,PX667140.1,Oligonychus sp.,"Russia: Primorskiy Krai, Russkiy Island, on Abies holophylla",2025,42.99,131.52,0.9146
-GenBank,PX667139.1,Oligonychus sp.,"Russia: Primorskiy Krai, city of Vladivostok, botanical gardens, on Pinus koraeiensis",2025,43.22,131.99,0.8639
-GenBank,PX667138.1,Oligonychus sp.,"Russia: Primorskiy Krai, Khasanskiy district, Nazimov cape, on Spodiopogon sibiricus",2025,42.6,130.77,0.943
-GenBank,PX660075.1,Oligonychus karamatus,"Russia: Altai Republic, on Larix sibirica",2025,50.23,87.78,0.9469
-GenBank,PX660071.1,Oligonychus sp.,"Russia: Tyumen Region, vicinity of Kuchak Lake, on Pinus sibirica",2025,57.35,66.05,0.8138
-GenBank,PX660065.1,Oligonychus sp.,"Russia: Primorskiy Krai, city of Vladivostok, batanical gardens, on Chamaecyparis pisifera",2025,43.22,131.99,0.8639
-GenBank,PX660049.1,Oligonychus piceae,"Russia: Tyumen Region,Tyumen city, Gagarin Park, on Pinus sylvestris",2025,57.16,65.6,0.8364
-GenBank,PX660047.1,Oligonychus sp.,"Russia: Primorskiy Krai, vicinities of Khanka Lake, on Pinus densifolia",2025,45.22,131.98,0.9788
+GenBank,PX667140.1,Oligonychus sp.,"Russia: Primorskiy Krai, Russkiy Island, on Abies holophylla",2025,42.99,131.52,0.9072
+GenBank,PX667139.1,Oligonychus sp.,"Russia: Primorskiy Krai, city of Vladivostok, botanical gardens, on Pinus koraeiensis",2025,43.22,131.99,0.8551
+GenBank,PX667138.1,Oligonychus sp.,"Russia: Primorskiy Krai, Khasanskiy district, Nazimov cape, on Spodiopogon sibiricus",2025,42.6,130.77,0.9395
+GenBank,PX660075.1,Oligonychus karamatus,"Russia: Altai Republic, on Larix sibirica",2025,50.23,87.78,0.9385
+GenBank,PX660071.1,Oligonychus sp.,"Russia: Tyumen Region, vicinity of Kuchak Lake, on Pinus sibirica",2025,57.35,66.05,0.8079
+GenBank,PX660065.1,Oligonychus sp.,"Russia: Primorskiy Krai, city of Vladivostok, batanical gardens, on Chamaecyparis pisifera",2025,43.22,131.99,0.8551
+GenBank,PX660049.1,Oligonychus piceae,"Russia: Tyumen Region,Tyumen city, Gagarin Park, on Pinus sylvestris",2025,57.16,65.6,0.8278
+GenBank,PX660047.1,Oligonychus sp.,"Russia: Primorskiy Krai, vicinities of Khanka Lake, on Pinus densifolia",2025,45.22,131.98,0.9742
 GenBank,PX419194.1,Oligonychus perseae,India,2025,9.87,77.09,1.0
 GenBank,PX415460.1,Oligonychus oryzae,India,2025,10.56,76.56,1.0
 GenBank,PX133189.1,Oligonychus trichardti,Kenya: Mbita Point,2024,-0.4311,34.2083,1.0
-BOLD,BIOSC1408-25,Oligonychus longiclavatus,Georgia,2016,41.747,45.2476,0.9535
-BOLD,BIOSC1413-25,Oligonychus longiclavatus,Georgia,2016,41.747,45.2476,0.9535
-BOLD,BIOSC1414-25,Oligonychus longiclavatus,Georgia,2016,41.747,45.2476,0.9535
-BOLD,GBAAH10334-25,Oligonychus oryzae,Unrecoverable,2025,10.56,76.56,1.0
+BOLD,BIOSC1408-25,Oligonychus longiclavatus,Georgia,2016,41.747,45.2476,0.951
+BOLD,BIOSC1413-25,Oligonychus longiclavatus,Georgia,2016,41.747,45.2476,0.951
+BOLD,BIOSC1414-25,Oligonychus longiclavatus,Georgia,2016,41.747,45.2476,0.951
 BOLD,GMBDE3466-23,Oligonychus biharensis,Bangladesh,2023,22.654,91.668,1.0
 BOLD,GMBDE5336-23,Oligonychus biharensis,Bangladesh,2023,22.6544,91.6683,1.0
 BOLD,GMPHZ5357-23,Oligonychus ununguis,Pakistan,2019,30.057,66.925,1.0

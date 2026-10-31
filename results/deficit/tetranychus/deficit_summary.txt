@@ -2,7 +2,7 @@ climate table            data/derived/climate_worldclim_10m.csv
 genus filter             Tetranychus
 records used             10643 (occurrence 9915, sequence specimens 728)
 duplicates collapsed     246 rows (101 with conflicting coordinates)
-crosswalk aliases        3607
+crosswalk aliases        4502
 moved to occurrence      94 COI-3P, 1 CYTB, 1 18S
 verdicts matched         690/728 (38 took the default weight of 0.25)
 mean verifiability       0.473

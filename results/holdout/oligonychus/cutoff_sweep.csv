@@ -1,10 +1,10 @@
 cutoff,train_sequence,test_sequence,observed,null_occurrence,p_lower_recorded,null_sequencing,p_lower_sequenced,ratio_to_occurrence_null,note
-2006,0,41,,,,,,,too few records either side
-2008,0,41,,,,,,,too few records either side
-2010,0,41,,,,,,,too few records either side
-2012,10,31,,,,,,,too few records either side
-2014,22,19,0.9352,0.9928,0.0005,0.7774,1.0,0.942,thin training library
-2015,23,18,0.9457,0.9926,0.0005,0.7703,1.0,0.953,thin training library
-2016,26,15,0.9308,0.9868,0.002,0.7596,1.0,0.943,thin training library
-2018,26,15,0.9308,0.9867,0.001,0.7596,1.0,0.943,thin training library
-2020,27,14,0.9091,0.9824,0.001,0.7448,1.0,0.925,thin training library
+2006,0,38,,,,,,,too few records either side
+2008,0,38,,,,,,,too few records either side
+2010,0,38,,,,,,,too few records either side
+2012,10,28,,,,,,,too few records either side
+2014,20,18,0.9279,0.9926,0.0005,0.7953,1.0,0.935,thin training library
+2015,21,17,0.9387,0.9923,0.0005,0.7869,1.0,0.946,thin training library
+2016,24,14,0.9221,0.9865,0.0005,0.7767,1.0,0.935,thin training library
+2018,24,14,0.9221,0.9864,0.0005,0.7767,1.0,0.935,thin training library
+2020,25,13,0.898,0.9819,0.001,0.7626,1.0,0.915,thin training library

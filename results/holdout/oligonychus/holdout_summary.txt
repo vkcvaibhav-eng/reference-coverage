@@ -1,15 +1,15 @@
 climate table              data/derived/climate_worldclim_10m.csv
 genus filter               Oligonychus
 cutoff year                2015
-training set               occurrence 2606, sequence 23
-test set                   18 sequence records after 2015
-verdicts matched (train)   20/23
+training set               occurrence 2606, sequence 21
+test set                   17 sequence records after 2015
+verdicts matched (train)   20/21
 PCA variance explained     PC1 47.1%, PC2 26.3%
 training deficit index     0.992
 
-mean uncovered fraction at specimens collected after 2015  0.946
-null 'recorded range'  0.993  [0.972, 1.000]  p upper 1.0000  p lower 0.0005
-null 'already sequenced'  0.770  [0.726, 0.818]  p upper 0.0005  p lower 1.0000
+mean uncovered fraction at specimens collected after 2015  0.939
+null 'recorded range'  0.992  [0.972, 1.000]  p upper 1.0000  p lower 0.0005
+null 'already sequenced'  0.787  [0.746, 0.831]  p upper 0.0005  p lower 1.0000
 
 reading: later-collected specimens sat in LESS uncovered climate than a resample of the recorded range
-caution: only 23 training sequences, below the 150 needed for a fair test
+caution: only 21 training sequences, below the 150 needed for a fair test
