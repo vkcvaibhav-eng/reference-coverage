@@ -39,8 +39,8 @@ coverage-threshold sensitivity (naive -> weighted):
      20  0.870 -> 0.937  (+7.7% inflation)
 
 top 5 sampling priorities:
-  1. unknown (-20, 46)  uncovered mass 140.5619
-  2. unknown (-34, 150)  uncovered mass 112.7935
-  3. unknown (-24, 42)  uncovered mass 94.5414
-  4. unknown (-14, 130)  uncovered mass 84.0396
-  5. unknown (-22, 54)  uncovered mass 71.837
+  1. MG (-20, 46)  uncovered mass 140.5619
+  2. AU (-34, 150)  uncovered mass 112.7935
+  3. MG (-24, 42)  uncovered mass 94.5414
+  4. AU (-14, 130)  uncovered mass 84.0396
+  5. RE (-22, 54)  uncovered mass 71.837
