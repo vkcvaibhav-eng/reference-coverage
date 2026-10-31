@@ -18,6 +18,11 @@ from decimal import Decimal, ROUND_HALF_UP
 from matplotlib.lines import Line2D
 
 plt.rcParams.update({
+    # Type 42 embeds the glyphs as TrueType. Matplotlib's default, Type 3,
+    # is rejected or flagged by most publishers' artwork checks and leaves
+    # the text unsearchable.
+    "pdf.fonttype": 42,
+    "ps.fonttype": 42,
     "font.family": "serif",
     "font.size": 8,
     "axes.labelsize": 8,
@@ -107,8 +112,8 @@ def fig_map(dd, outdir):
                     textcoords="offset points", xytext=(6, 4), fontsize=7,
                     color="#1f78b4", fontweight="bold")
     ax.axhline(0, color="0.8", lw=0.4)
-    ax.set_xlim(-180, 180)
-    ax.set_ylim(-60, 80)
+    ax.set_xlim(-187, 187)      # margin so a priority label at 180° is not clipped
+    ax.set_ylim(-63, 80)
     ax.set_xlabel("Longitude (°)")
     ax.set_ylabel("Latitude (°)")
     ax.set_xticks(range(-180, 181, 60))
@@ -166,7 +171,7 @@ def fig_sensitivity(dd, outdir):
     a1.set_xlabel("Coverage deficit index")
     for yi, (v, e) in enumerate(zip(idx, eff)):
         a1.text(v + 0.006, yi, f"{v:.3f}  (n={one_dp(e)})", va="center",
-                fontsize=6)
+                fontsize=7)
     a1.set_xlim(0, max(idx) * 1.55)
 
     k = [float(r["min_reliable"]) for r in ts]
@@ -179,7 +184,7 @@ def fig_sensitivity(dd, outdir):
     for xi, a, b in zip(k, dn, dw):
         a2.annotate(f"+{(b / a - 1) * 100:.0f}%", (xi, b),
                     textcoords="offset points", xytext=(0, 5),
-                    ha="center", fontsize=6, color="#2b5d8a")
+                    ha="center", fontsize=7, color="#2b5d8a")
     a2.set_xscale("log")
     a2.set_xlim(min(k) * 0.82, max(k) * 1.22)   # room for the end annotations
     a2.set_xticks(k)
@@ -206,7 +211,8 @@ def fig_holdout(hd, outdir, min_train=150):
     ntr = np.array([int(r["train_sequence"]) for r in rows])
 
     fig, (a1, a2) = plt.subplots(1, 2, figsize=(DOUBLE, DOUBLE / 2.7),
-                                 gridspec_kw={"width_ratios": [1.35, 1]})
+                                 gridspec_kw={"width_ratios": [1.2, 1]})
+    fig.subplots_adjust(wspace=0.32)
 
     a1.plot(yr, n_occ, "^--", color="#b2182b", ms=4, lw=1.0,
             label="Null: recorded range")
@@ -219,12 +225,13 @@ def fig_holdout(hd, outdir, min_train=150):
     if thin.any():
         a1.axvspan(yr.min() - 0.6, yr[thin].max() + 0.6, color="0.9", zorder=0)
         a1.text(yr[thin].mean(), 0.02, f"training library\n< {min_train} sequences",
-                ha="center", fontsize=6, color="0.35")
+                ha="center", fontsize=7, color="0.35")
     a1.set_xticks(yr)
     a1.set_xticklabels([str(v) for v in yr], rotation=45, ha="right")
     a1.set_xlabel("Cutoff year")
     a1.set_ylabel("Mean uncovered fraction")
-    a1.set_ylim(0, 1.0)
+    a1.set_ylim(0, 1.2)
+    a1.set_yticks(np.arange(0, 1.01, 0.2))
     a1.legend(frameon=False, loc="upper right")
 
     ratio = obs / n_occ
@@ -238,9 +245,9 @@ def fig_holdout(hd, outdir, min_train=150):
     a2.set_ylabel("Observed / null (recorded range)")
     a2.set_ylim(0, max(1.35, ratio.max() * 1.12))
     a2.text(0.5, 0.93, "later-collected records in less-covered climate",
-            transform=a2.transAxes, ha="center", fontsize=6, color="0.35")
+            transform=a2.transAxes, ha="center", fontsize=7, color="0.35")
     a2.text(0.5, 0.06, "later-collected records in better-covered climate",
-            transform=a2.transAxes, ha="center", fontsize=6, color="0.35")
+            transform=a2.transAxes, ha="center", fontsize=7, color="0.35")
     # consecutive cutoff years sit close together, so drop every second
     # label of a tight run onto a lower row to keep the counts readable
     prev_x, low = None, False
@@ -248,7 +255,7 @@ def fig_holdout(hd, outdir, min_train=150):
         low = False if prev_x is None or x - prev_x > 1.5 else not low
         a2.annotate(f"{n}", (x, y_), textcoords="offset points",
                     xytext=(0, -18 if low else -11), ha="center",
-                    fontsize=5.5, color="0.45")
+                    fontsize=7, color="0.45")
         prev_x = x
 
     for ax, lab in ((a1, "a"), (a2, "b")):
