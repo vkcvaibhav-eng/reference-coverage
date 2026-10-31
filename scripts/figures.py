@@ -221,9 +221,15 @@ def fig_holdout(hd, outdir, min_train=150):
             transform=a2.transAxes, ha="center", fontsize=6, color="0.35")
     a2.text(0.5, 0.06, "later-collected records in better-covered climate",
             transform=a2.transAxes, ha="center", fontsize=6, color="0.35")
+    # consecutive cutoff years sit close together, so drop every second
+    # label of a tight run onto a lower row to keep the counts readable
+    prev_x, low = None, False
     for x, y_, n in zip(yr, ratio, ntr):
+        low = False if prev_x is None or x - prev_x > 1.5 else not low
         a2.annotate(f"{n}", (x, y_), textcoords="offset points",
-                    xytext=(0, -11), ha="center", fontsize=5.5, color="0.45")
+                    xytext=(0, -18 if low else -11), ha="center",
+                    fontsize=5.5, color="0.45")
+        prev_x = x
 
     for ax, lab in ((a1, "a"), (a2, "b")):
         ax.text(-0.13, 1.08, f"({lab})", transform=ax.transAxes, va="top",
