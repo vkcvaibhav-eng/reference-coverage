@@ -1,4 +1,4 @@
-Response to the technical check
+# Response to the technical check
 
 Manuscript title: Evidence-weighted climatic coverage of public COI reference libraries: a framework applied to spider mites
 Manuscript ID: 2e57974f-0aa8-4a65-98fe-3e818f09e55d v1.0
@@ -14,7 +14,7 @@ What was wrong is the attribution. In Methods, the identifiers for two of the th
 
 The sentence in Methods now reads:
 
-Occurrence records were obtained from GBIF through the download API, which issues a citable DOI for a frozen snapshot, on 31 October 2026: *Tetranychus urticae* (6,646 records; doi:10.15468/dl.5mckab), *Tetranychus* at genus level (15,793 records; doi:10.15468/dl.aejp4w) and *Oligonychus* at genus level (4,706 records; doi:10.15468/dl.xxfcra).
+> Occurrence records were obtained from GBIF through the download API, which issues a citable DOI for a frozen snapshot, on 31 October 2026: *Tetranychus urticae* (6,646 records; doi:10.15468/dl.5mckab), *Tetranychus* at genus level (15,793 records; doi:10.15468/dl.aejp4w) and *Oligonychus* at genus level (4,706 records; doi:10.15468/dl.xxfcra).
 
 Each identifier was verified against the GBIF download API before this response was written: 10.15468/dl.5mckab is taxon key 2130185, *Tetranychus urticae*, 6,646 records; 10.15468/dl.aejp4w is taxon key 2130777, *Tetranychus*, 15,793 records; and 10.15468/dl.xxfcra is taxon key 7871727, *Oligonychus*, 4,706 records. The list of the three downloads in the data availability statement is unordered and required no change.
 
