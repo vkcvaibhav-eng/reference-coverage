@@ -47,12 +47,22 @@ def read(path):
         return list(csv.DictReader(f))
 
 
-def save(fig, outdir, name):
+def save(fig, outdir, name, tiff_dpi=600):
+    """PDF and PNG for our own use, TIFF for submission.
+
+    Springer asks for at least 600 dpi for combination art and 1200 dpi for
+    line art, so panels built from images take the default and panels that
+    are purely drawn take 1200. EPS is not written: these figures use alpha,
+    which EPS cannot express, so the parts using it would be rasterised at
+    whatever resolution the exporter chose.
+    """
     os.makedirs(outdir, exist_ok=True)
-    for ext in ("pdf", "eps", "png"):
+    for ext in ("pdf", "png"):
         fig.savefig(os.path.join(outdir, f"{name}.{ext}"), dpi=600)
+    fig.savefig(os.path.join(outdir, f"{name}.tiff"), dpi=tiff_dpi,
+                pil_kwargs={"compression": "tiff_lzw"})
     plt.close(fig)
-    print(f"  {name}")
+    print(f"  {name}  (tiff {tiff_dpi} dpi)")
 
 
 def fig_climate_space(dd, outdir):
@@ -200,7 +210,7 @@ def fig_sensitivity(dd, outdir):
     for ax, lab in ((a1, "a"), (a2, "b")):
         ax.text(-0.12, 1.08, f"({lab})", transform=ax.transAxes, va="top",
                 fontsize=9, fontweight="bold")
-    save(fig, outdir, "Fig3_sensitivity")
+    save(fig, outdir, "Fig3_sensitivity", tiff_dpi=1200)
 
 
 def fig_holdout(hd, outdir, min_train=150):
@@ -264,7 +274,7 @@ def fig_holdout(hd, outdir, min_train=150):
     for ax, lab in ((a1, "a"), (a2, "b")):
         ax.text(-0.13, 1.08, f"({lab})", transform=ax.transAxes, va="top",
                 fontsize=9, fontweight="bold")
-    save(fig, outdir, "Fig4_holdout")
+    save(fig, outdir, "Fig4_holdout", tiff_dpi=1200)
 
 
 def main():

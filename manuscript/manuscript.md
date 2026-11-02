@@ -38,7 +38,7 @@ The framework therefore asks, for a given taxon, how much of its recorded climat
 
 ### Occurrence records
 
-Occurrence records were obtained from GBIF through the download API, which issues a citable DOI for a frozen snapshot, on 31 October 2026: *Tetranychus urticae* (6,646 records; doi:10.15468/dl.xxfcra), *Tetranychus* at genus level (15,793 records; doi:10.15468/dl.aejp4w) and *Oligonychus* at genus level (4,706 records; doi:10.15468/dl.5mckab).
+Occurrence records were obtained from GBIF through the download API, which issues a citable DOI for a frozen snapshot, on 31 October 2026: *Tetranychus urticae* (6,646 records; doi:10.15468/dl.5mckab), *Tetranychus* at genus level (15,793 records; doi:10.15468/dl.aejp4w) and *Oligonychus* at genus level (4,706 records; doi:10.15468/dl.xxfcra).
 
 Coordinates were screened following the categories of problem catalogued by Zizka et al. (2019). Records were removed when they carried a GBIF issue flag that makes a coordinate unusable (`ZERO_COORDINATE`, `COORDINATE_OUT_OF_RANGE`, `COORDINATE_INVALID`, `COUNTRY_COORDINATE_MISMATCH`, `PRESUMED_SWAPPED_COORDINATE`, `PRESUMED_NEGATED_LATITUDE`, `PRESUMED_NEGATED_LONGITUDE`), when latitude equalled longitude, when both were integers, when stated coordinate uncertainty exceeded 50 km, or when a flag indicated derivation from an administrative centre. These are operational filters on the fields GBIF supplies, not determinations about how a record was made; `COORDINATE_ROUNDED` in particular indicates decimal rounding rather than an established administrative centroid, and we treat it conservatively.
 
